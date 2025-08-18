@@ -1,46 +1,43 @@
-# Getting Started with Create React App
+# PM — A Search‑First Personal Navigation
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+PM is a minimalist personal navigation site that replaces the traditional bento.me‑style card grid with a single, powerful search box. Instead of scanning tiles, you simply type what you’re looking for and jump straight to the right destination.
 
-## Available Scripts
+## Why search‑first, not cards?
 
-In the project directory, you can run:
+- __Less visual noise__: One clean input instead of a wall of tiles.
+- __Faster access__: Muscle‑memory queries beat hunting for buttons.
+- __Scales elegantly__: Adding more links doesn’t clutter the UI.
+- __Feels modern__: A focused, glass‑morphism interface with subtle motion and clarity.
 
-### `npm start`
+## What you can do
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- __Find a profile quickly__: Type a platform name (e.g., “Twitter”, “GitHub”) or a keyword.
+- __Skim suggestions__: A dropdown shows the top matches with icons, names, and usernames.
+- __Jump instantly__: Click a suggestion to open it in a new tab.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Customizing your links
 
-### `npm test`
+Your profiles are editable in a simple list so you can make this site truly yours. Add, remove, or rename entries to match your online footprint and personal style.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Suggested fields for each entry:
+- __id__: short identifier
+- __name__: display name of the platform
+- __username__: your handle or label
+- __icon__: the platform icon name
+- __url__: the link to open
 
-### `npm run build`
+## Design principles
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- __Clarity over clutter__: generous spacing, strong alignment, and clear separation.
+- __Glass aesthetic__: soft translucency, subtle shadows, and smooth hover states.
+- __Consistency__: icons, text, and dividers align to a shared rhythm for calm visuals.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Roadmap
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Keyboard navigation for the dropdown
+- Accessibility/ARIA improvements
+- More profile types and icon options
 
-### `npm run eject`
+## License
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+MIT
