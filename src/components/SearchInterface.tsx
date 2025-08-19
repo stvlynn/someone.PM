@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Send, Code, Twitter, Telegram, Github, Instagram, NavArrowRight } from 'iconoir-react';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
 
 export default function SearchInterface() {
   const [query, setQuery] = useState('');
@@ -7,12 +8,19 @@ export default function SearchInterface() {
   const [suggestions, setSuggestions] = useState<SocialItem[]>([]);
   const [loadingLLM, setLoadingLLM] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<SocialItem | null>(null);
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault?.();
-    console.log('Search query:', query);
+    if (selectedItem) {
+      window.open(selectedItem.url, '_blank');
+    } else {
+      console.log('Search query:', query);
+    }
   };
 
   const handleClick = () => handleSubmit();
@@ -159,11 +167,21 @@ export default function SearchInterface() {
     }
   }
 
+  // Handle item selection
+  const handleSelectItem = (item: SocialItem) => {
+    setSelectedItem(item);
+    setQuery(`${item.name} (${item.username})`);
+    setSuggestions([]); // Clear suggestions dropdown
+    setHighlightedIndex(-1);
+  };
+
   // recompute suggestions on query change
   useEffect(() => {
     const run = async () => {
       if (!query.trim()) {
         setSuggestions(socials);
+        setSelectedItem(null); // Clear selection when query is cleared
+        setHighlightedIndex(-1);
         return;
       }
       const local = localRank(query, socials);
@@ -201,27 +219,104 @@ export default function SearchInterface() {
       <div ref={containerRef} className="flex items-center gap-14 pointer-events-auto relative z-20">
         {/* Left: Glass Input */}
         <form onSubmit={handleSubmit} aria-label="Search" className="relative">
-          <div className="flex items-center w-[520px] h-16 px-6 bg-black/30 backdrop-blur-xl ring-1 ring-white/25 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.45)]">
+          <div className="relative flex items-center w-[520px] h-16 px-6 bg-black/30 backdrop-blur-xl ring-1 ring-white/25 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.45)]">
+            <GlowingEffect
+              variant="white"
+              glow={true}
+              disabled={false}
+              proximity={64}
+              spread={40}
+              inactiveZone={0.01}
+            />
             <div className="w-10 flex items-center justify-center shrink-0">
-              <Code className="w-5 h-5 text-white/80" aria-hidden />
+              {selectedItem ? (
+                (() => {
+                  const Icon = IconById[selectedItem.icon] ?? ((p: any) => <Code {...p} />);
+                  return <Icon className="w-5 h-5 text-white/80" />;
+                })()
+              ) : (
+                <Code className="w-5 h-5 text-white/80" aria-hidden />
+              )}
             </div>
             <input
               type="text"
+              ref={inputRef}
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSelectedItem(null); // Clear selection when user types
+              }}
               onFocus={() => setIsFocused(true)}
+              onKeyDown={(e) => {
+                const visible = suggestions.slice(0, 5);
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  setIsFocused(true);
+                  setHighlightedIndex((prev) => {
+                    const next = prev < visible.length - 1 ? prev + 1 : 0;
+                    return visible.length ? next : -1;
+                  });
+                } else if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  setIsFocused(true);
+                  setHighlightedIndex((prev) => {
+                    const next = prev > 0 ? prev - 1 : visible.length - 1;
+                    return visible.length ? next : -1;
+                  });
+                } else if (e.key === 'Enter') {
+                  const visible = suggestions.slice(0, 5);
+                  if (highlightedIndex >= 0 && highlightedIndex < visible.length) {
+                    e.preventDefault();
+                    handleSelectItem(visible[highlightedIndex]);
+                    handleSubmit();
+                  }
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  setIsFocused(false);
+                  setHighlightedIndex(-1);
+                  inputRef.current?.blur();
+                }
+              }}
               placeholder="Type Anything..."
+              role="combobox"
+              aria-expanded={Boolean(query && suggestions.length > 0)}
+              aria-controls="search-suggestions"
+              aria-activedescendant={highlightedIndex >= 0 ? `option-${highlightedIndex}` : undefined}
+              aria-autocomplete="list"
               className="ml-3 flex-1 bg-transparent text-white placeholder-white/70 outline-none"
             />
           </div>
           {/* Suggestions dropdown */}
           {query && suggestions.length > 0 && (
-            <div className="absolute left-0 top-full mt-16 w-[520px] bg-black/30 backdrop-blur-xl ring-1 ring-white/25 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.45)] overflow-hidden">
+            <div
+              id="search-suggestions"
+              role="listbox"
+              aria-label="Search suggestions"
+              className="relative absolute left-0 top-full mt-16 w-[520px] bg-black/30 backdrop-blur-xl ring-1 ring-white/25 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.45)] overflow-hidden"
+            >
+              <GlowingEffect
+                variant="white"
+                glow={true}
+                disabled={false}
+                proximity={64}
+                spread={40}
+                inactiveZone={0.01}
+              />
               {suggestions.slice(0, 5).map((s, index) => {
                 const Icon = IconById[s.icon] ?? ((p: any) => <Code {...p} />);
                 return (
                   <div key={s.id}>
-                    <div className="flex items-center h-14 px-6 cursor-pointer hover:bg-white/10 transition-colors" onClick={() => window.open(s.url, '_blank')}>
+                    <div
+                      id={`option-${index}`}
+                      role="option"
+                      aria-selected={highlightedIndex === index}
+                      tabIndex={-1}
+                      className={`flex items-center h-14 px-6 cursor-pointer transition-colors ${
+                        highlightedIndex === index ? 'bg-white/15' : 'hover:bg-white/10'
+                      }`}
+                      onClick={() => handleSelectItem(s)}
+                      onMouseMove={() => setHighlightedIndex(index)}
+                    >
                       <div className="w-10 flex items-center justify-center shrink-0">
                         <Icon className="w-5 h-5 text-white/80" />
                       </div>
@@ -253,9 +348,17 @@ export default function SearchInterface() {
         <button
           type="button"
           onClick={handleClick}
-          className="w-16 h-16 flex items-center justify-center bg-black/30 backdrop-blur-xl ring-1 ring-white/25 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.35)] hover:bg-white/15 active:scale-95 transition"
+          className="relative w-16 h-16 flex items-center justify-center bg-black/30 backdrop-blur-xl ring-1 ring-white/25 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.35)] hover:bg-white/15 active:scale-95 transition"
           aria-label="Send"
         >
+          <GlowingEffect
+            variant="white"
+            glow={true}
+            disabled={false}
+            proximity={64}
+            spread={40}
+            inactiveZone={0.01}
+          />
           <Send className="w-6 h-6 text-white" />
         </button>
       </div>
