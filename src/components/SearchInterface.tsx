@@ -210,7 +210,7 @@ export default function SearchInterface() {
   }, [isFocused]);
 
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
+    <div className="relative w-screen h-screen z-10 flex items-center justify-center pointer-events-none">
       {/* Background blur overlay when focused */}
       <div className={`absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-none transition-opacity duration-300 ${
         isFocused ? 'opacity-100' : 'opacity-0'

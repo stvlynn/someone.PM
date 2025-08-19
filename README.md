@@ -20,6 +20,7 @@ PM is a minimalist personal navigation site that replaces the traditional bento.
 Your profiles are editable in a simple list so you can make this site truly yours. Add, remove, or rename entries to match your online footprint and personal style.
 
 Suggested fields for each entry:
+
 - __id__: short identifier
 - __name__: display name of the platform
 - __username__: your handle or label
