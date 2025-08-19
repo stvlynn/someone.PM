@@ -6,7 +6,9 @@ export default function SearchInterface() {
   const [socials, setSocials] = useState<SocialItem[]>([]);
   const [suggestions, setSuggestions] = useState<SocialItem[]>([]);
   const [loadingLLM, setLoadingLLM] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault?.();
@@ -172,9 +174,31 @@ export default function SearchInterface() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, socials]);
 
+  // Handle click outside to blur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsFocused(false);
+      }
+    };
+
+    if (isFocused) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFocused]);
+
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
-      <div className="flex items-center gap-14 pointer-events-auto">
+      {/* Background blur overlay when focused */}
+      <div className={`absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-none transition-opacity duration-300 ${
+        isFocused ? 'opacity-100' : 'opacity-0'
+      }`} />
+      
+      <div ref={containerRef} className="flex items-center gap-14 pointer-events-auto relative z-20">
         {/* Left: Glass Input */}
         <form onSubmit={handleSubmit} aria-label="Search" className="relative">
           <div className="flex items-center w-[520px] h-16 px-6 bg-black/30 backdrop-blur-xl ring-1 ring-white/25 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.45)]">
@@ -185,6 +209,7 @@ export default function SearchInterface() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setIsFocused(true)}
               placeholder="Type Anything..."
               className="ml-3 flex-1 bg-transparent text-white placeholder-white/70 outline-none"
             />
