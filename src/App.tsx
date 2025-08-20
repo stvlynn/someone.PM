@@ -119,26 +119,26 @@ function App() {
             {(() => {
               const phrase = 'Build Value Together With AI'
               const words = phrase.split(' ')
-              const charsFlat = Array.from(phrase).filter((c) => c !== ' ')
-              const total = charsFlat.length
-              // Map progress (0..1) to visible count across all non-space chars
+              const totalLetters = phrase.replace(/\s+/g, '').length
+              // Progress -> number of revealed letters (spaces excluded)
               const eased = Math.max(0, Math.min(1, (scrollProgress - 0.05) / 0.9))
-              const visibleCount = Math.floor(eased * total)
+              const visibleCount = Math.floor(eased * totalLetters)
 
-              let accIndex = 0
+              let offset = 0 // running index across letters
               return (
                 <div aria-label={phrase}>
-                  {words.map((word, wi) => {
-                    const letters = Array.from(word)
+                  {words.map((word, wIdx) => {
+                    const start = offset
+                    offset += word.length
                     return (
-                      <div key={wi} className="word-line">
-                        {letters.map((ch, ci) => {
-                          const globalIndex = accIndex
-                          accIndex += 1
+                      <div className="word-line" key={wIdx}>
+                        {Array.from(word).map((ch, i) => {
+                          const globalIndex = start + i
+                          const isVisible = globalIndex < visibleCount
                           return (
                             <span
-                              key={`${wi}-${ci}`}
-                              className={`character ${globalIndex < visibleCount ? 'animate-in' : ''}`}
+                              key={i}
+                              className={`character ${isVisible ? 'animate-in' : ''}`}
                             >
                               {ch}
                             </span>

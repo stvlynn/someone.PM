@@ -73,7 +73,7 @@
   justify-content: center;
 }
 
-/* Each word on its own line */
+/* Ensure each word renders on its own line */
 .word-line {
   display: block;
   margin: 0.25rem 0;
