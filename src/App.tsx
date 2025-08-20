@@ -8,7 +8,6 @@ import stvWhite from './assets/stv-white.png'
 function App() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isImageHovered, setIsImageHovered] = useState(false)
-  const [visibleChars, setVisibleChars] = useState<Set<number>>(new Set())
   const [isContentSticky, setIsContentSticky] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0) // 0..1 progress for second section
   const textContentRef = useRef<HTMLDivElement>(null)
@@ -43,24 +42,13 @@ function App() {
       const releaseThreshold = 1.15
       const shouldBeSticky = pastFirstScreen && textScrollProgress < releaseThreshold
       setIsContentSticky(shouldBeSticky)
-
-      // Determine which characters should be visible based on scroll progress
-      const newVisibleChars = new Set<number>()
-      
-      if (textScrollProgress > 0.1) newVisibleChars.add(1)
-      if (textScrollProgress > 0.3) newVisibleChars.add(2)
-      if (textScrollProgress > 0.5) newVisibleChars.add(3)
-      if (textScrollProgress > 0.7) newVisibleChars.add(4)
-      if (textScrollProgress > 0.9) newVisibleChars.add(5)
-
-      setVisibleChars(newVisibleChars)
     }
 
     window.addEventListener('scroll', handleScroll)
     handleScroll() // Initial check
 
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [visibleChars.size])
+  }, [])
 
   return (
     <>
@@ -128,11 +116,40 @@ function App() {
           <div ref={textContentRef} className={`text-content transition-all duration-300 ${
             isImageHovered ? 'blur-sm' : ''
           }`}>
-            <h2 className={`character char-1 ${visibleChars.has(1) ? 'animate-in' : ''}`}>Build</h2>
-            <h2 className={`character char-2 ${visibleChars.has(2) ? 'animate-in' : ''}`}>Value</h2>
-            <h2 className={`character char-3 ${visibleChars.has(3) ? 'animate-in' : ''}`}>Together</h2>
-            <h2 className={`character char-4 ${visibleChars.has(4) ? 'animate-in' : ''}`}>With</h2>
-            <h2 className={`character char-5 ${visibleChars.has(5) ? 'animate-in' : ''}`}>AI</h2>
+            {(() => {
+              const phrase = 'Build Value Together With AI'
+              const words = phrase.split(' ')
+              const charsFlat = Array.from(phrase).filter((c) => c !== ' ')
+              const total = charsFlat.length
+              // Map progress (0..1) to visible count across all non-space chars
+              const eased = Math.max(0, Math.min(1, (scrollProgress - 0.05) / 0.9))
+              const visibleCount = Math.floor(eased * total)
+
+              let accIndex = 0
+              return (
+                <div aria-label={phrase}>
+                  {words.map((word, wi) => {
+                    const letters = Array.from(word)
+                    return (
+                      <div key={wi} className="word-line">
+                        {letters.map((ch, ci) => {
+                          const globalIndex = accIndex
+                          accIndex += 1
+                          return (
+                            <span
+                              key={`${wi}-${ci}`}
+                              className={`character ${globalIndex < visibleCount ? 'animate-in' : ''}`}
+                            >
+                              {ch}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
           </div>
         </div>
       </section>
