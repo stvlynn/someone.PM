@@ -18,9 +18,11 @@
 
 /* Content page styles */
 .content-page {
+  /* Override base .page-section fixed height to allow long scroll */
+  height: auto;
+  min-height: 300vh; /* provide scroll distance for the animation */
   scroll-timeline-name: --section;
   scroll-timeline-axis: block;
-  min-height: 300vh; /* provide scroll distance for the animation */
   view-timeline-name: --section;
   view-timeline-axis: block;
 }
@@ -168,8 +170,8 @@
 /* Cursor dot from original styles */
 .cursor-dot {
   position: fixed;
-  width: 8px;
-  height: 8px;
+  width: 24px;
+  height: 24px;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 50%;
   pointer-events: none;
@@ -190,4 +192,73 @@ html, body {
   padding: 0;
   width: 100%;
   min-height: 100vh;
+}
+
+/* Third page centered text */
+.third-page {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.third-container {
+  width: 100%;
+  max-width: 64rem; /* ~1024px */
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Third page title matches second page font & size */
+.third-title {
+  font-family: "Jersey 20", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 4rem;
+  color: white;
+  line-height: 1.1;
+  text-align: center;
+}
+
+/* Third page two-column layout */
+.third-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 2rem;
+}
+
+.sticky-left {
+  position: sticky;
+  top: 50vh; /* stick when the top reaches the center of viewport */
+  transform: translateY(-50%);
+}
+
+.right-stage {
+  position: relative;
+  min-height: 60vh;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.right-name {
+  opacity: 1; /* fully visible, above now-semi-transparent hover effect */
+  text-align: center;
+}
+
+.right-hover {
+  pointer-events: auto;
+  min-height: 400px;
+}
+
+@media (max-width: 900px) {
+  .third-grid {
+    grid-template-columns: 1fr;
+  }
+  .sticky-left {
+    top: 20vh;
+  }
 }

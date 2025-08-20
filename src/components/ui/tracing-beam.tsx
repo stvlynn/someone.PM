@@ -1,12 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  motion,
-  useTransform,
-  useScroll,
-  useVelocity,
-  useSpring,
-} from "motion/react";
+import { motion, useTransform, useScroll, useSpring } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export const TracingBeam = ({
@@ -19,16 +13,30 @@ export const TracingBeam = ({
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start", "end start"],
+    // Track from when the section enters the viewport top until its end reaches the top
+    offset: ["start start", "end start"],
   });
 
   const contentRef = useRef<HTMLDivElement>(null);
   const [svgHeight, setSvgHeight] = useState(0);
 
   useEffect(() => {
-    if (contentRef.current) {
-      setSvgHeight(contentRef.current.offsetHeight);
-    }
+    const calc = () => {
+      // Use wrapper (section) height so fixed children don't collapse measurement
+      if (ref.current) {
+        const h = ref.current.getBoundingClientRect().height;
+        // Fallback to window height if zero
+        setSvgHeight(h > 0 ? h : window.innerHeight);
+      }
+    };
+    calc();
+    const ro = new ResizeObserver(calc);
+    if (ref.current) ro.observe(ref.current);
+    window.addEventListener('resize', calc);
+    return () => {
+      window.removeEventListener('resize', calc);
+      ro.disconnect();
+    };
   }, []);
 
   const y1 = useSpring(
@@ -49,9 +57,9 @@ export const TracingBeam = ({
   return (
     <motion.div
       ref={ref}
-      className={cn("relative mx-auto h-full w-full max-w-4xl", className)}
+      className={cn("relative mx-auto h-full w-full max-w-4xl z-40", className)}
     >
-      <div className="absolute top-3 -left-4 md:-left-20">
+      <div className="absolute top-3 -left-4 md:-left-20 pointer-events-none z-40">
         <motion.div
           transition={{
             duration: 0.2,
@@ -63,7 +71,7 @@ export const TracingBeam = ({
                 ? "none"
                 : "rgba(0, 0, 0.24) 0px 3px 8px",
           }}
-          className="border-netural-200 ml-[27px] flex h-4 w-4 items-center justify-center rounded-full border border-slate-200 shadow-sm dark:border-slate-800"
+          className="ml-[27px] flex h-4 w-4 items-center justify-center rounded-full border border-slate-200 shadow-sm dark:border-slate-800"
         >
           <motion.div
             transition={{

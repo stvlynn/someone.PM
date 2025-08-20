@@ -7,23 +7,6 @@
   cursor: none;
 }
 
-/* Custom white dot cursor */
-* {
-  cursor: none;
-}
-
-.cursor-dot {
-  position: fixed;
-  width: 16px;
-  height: 16px;
-  background-color: white;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: transform 0.1s ease;
-}
-
 html, body, #root {
   height: 100%;
   width: 100%;
