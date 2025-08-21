@@ -11,50 +11,71 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Architecture
 
-This is a search-first personal navigation site that replaces traditional card grids with a powerful search interface. The application combines Three.js visual effects with a minimalist search experience.
+This is a multi-page personal navigation site featuring a search-first interface combined with animated content sections and Three.js visual effects.
 
-### Core Structure
-- `src/App.tsx` - Main app component that renders the dither background and search interface with custom cursor
-- `src/components/SearchInterface.tsx` - Search UI with intelligent suggestion system and dropdown
-- `src/components/Dither.tsx` - Three.js-based dithered wave background with mouse interaction
-- `public/socials.yaml` - Configuration file for social media profiles and links
+### Multi-Page Structure
+The application consists of three distinct full-screen sections:
+1. **Search Page** - Main search interface with glassmorphism design
+2. **Content Page** - Scroll-driven animations with sticky positioning and text reveal effects
+3. **Third Page** - Two-column layout with sticky intro and interactive hover text
+
+### Core Components
+- `src/App.tsx` - Main orchestrator managing scroll states, mouse tracking, and page transitions
+- `src/components/SearchInterface.tsx` - Intelligent search with dual-layer ranking (local + LLM)
+- `src/components/Dither.tsx` - Three.js-based animated background with wave shaders and dithering
+- `src/components/ui/` - Reusable UI components (glowing effects, cards, tracing beams)
+- `src/BlurText.tsx` - Text animation component with blur and reveal effects
+- `src/components/FallingText.tsx` - Interactive text component with hover-triggered animations
 
 ### Key Technologies
 - **React 19** with TypeScript
 - **Vite** for build tooling
-- **Three.js + React Three Fiber** for 3D graphics
-- **Postprocessing** for shader effects
+- **Three.js + React Three Fiber** for 3D graphics and shaders
+- **Postprocessing** for advanced shader effects
+- **Motion library** for smooth animations
 - **Tailwind CSS** for styling
 - **Iconoir React** for icons
+- **GSAP** for complex animations
 
 ### Search System Architecture
-The `SearchInterface.tsx` implements a dual-layer search system:
-- **Local ranking**: Lightweight string matching for immediate results
-- **LLM ranking**: OpenAI GPT-4o-mini for intelligent result ordering (requires `VITE_OPENAI_API_KEY`)
+The `SearchInterface.tsx` implements a sophisticated search system:
+- **Dual-layer ranking**: Local string matching + OpenAI GPT-4o-mini for intelligent ordering
 - **Custom YAML parser**: Reads social profiles from `public/socials.yaml`
-- **Glassmorphism UI**: Backdrop blur effects with consistent icon spacing
+- **Glassmorphism UI**: Backdrop blur effects with glowing borders
+- **Keyboard navigation**: Full arrow key and enter support
+- **Abort controller**: Prevents race conditions with LLM requests
+
+### Animation System
+- **Scroll-driven animations**: Progress-based text reveal and sticky positioning
+- **Per-character rendering**: Fine-grained control over text animations
+- **Mouse interaction**: Background responds to cursor movement
+- **Cross-page transitions**: Smooth visual states between sections
+
+### Dither Background System
+The `Dither.tsx` component creates a sophisticated animated background:
+- **Custom GLSL shaders**: Wave generation using Simplex noise
+- **Bayer matrix dithering**: 8x8 matrix for retro color reduction
+- **Mouse interaction**: Real-time wave distortion based on cursor position
+- **Configurable parameters**: Wave speed, frequency, amplitude, color levels
+- **Post-processing effects**: Custom dithering effect with pixelation
 
 ### Data Flow
-1. `socials.yaml` contains profile definitions (id, name, username, icon, url)
-2. Custom YAML parser converts file content to `SocialItem[]` array
+1. `socials.yaml` contains social profile definitions
+2. Custom YAML parser converts to `SocialItem[]` array
 3. Search queries trigger both local and LLM ranking algorithms
 4. Results display in dropdown with icons, names, and navigation arrows
+5. Scroll progress drives animations in content sections
 
-### Dither Component Architecture
-The `Dither.tsx` component creates an animated background with:
-- Custom GLSL shaders for wave generation and dithering effects
-- Mouse interaction support for wave distortion
-- Configurable parameters (wave speed, frequency, amplitude, color levels, etc.)
-- Bayer matrix dithering for retro color reduction effect
-
-### Custom Cursor
-The app uses a custom white dot cursor (16px) implemented through:
-- CSS `.cursor-dot` class in `src/index.css`
+### Custom Cursor System
+Global custom cursor implementation:
+- CSS `.cursor-dot` class (24px white dot)
 - Mouse position tracking in `src/App.tsx`
 - Global `cursor: none` to hide default cursor
+- Smooth transition effects
 
 ## Build Configuration
 - TypeScript app config in `tsconfig.app.json`
 - Vite configuration with React plugin
 - ESLint configuration with React-specific rules
-- Tailwind CSS with PostCSS processing
+- Tailwind CSS v4 with PostCSS processing
+- Path aliases configured (`@/` maps to `src/`)

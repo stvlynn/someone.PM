@@ -196,7 +196,9 @@ html, body {
 
 /* Third page centered text */
 .third-page {
-  height: 100vh;
+  /* allow additional scroll room for sticky + exit animation */
+  height: auto;
+  min-height: 180vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -208,6 +210,17 @@ html, body {
   margin: 0 auto;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
+}
+
+/* Third page sticky behavior (mirror of content-container.sticky-content) */
+.third-container.third-sticky {
+  position: fixed !important;
+  top: 50% !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: translateY(-50%) !important;
+  z-index: 25 !important;
+  width: 100% !important;
 }
 
 /* Third page title matches second page font & size */
