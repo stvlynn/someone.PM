@@ -1,0 +1,43 @@
+/* Global effects styles */
+.cursor-dot {
+  position: fixed;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: all 0.1s ease;
+}
+
+.stv-image {
+  width: 300px;
+  height: auto;
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+}
+
+@keyframes slideUp {
+  0% {
+    translate: 0 100vh;
+    opacity: 0;
+  }
+  100% {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
+/* Document defaults to allow window scrolling */
+html, body {
+  height: auto;
+  overflow-y: auto;
+}
+
+/* Root should be at least full viewport, but expand with content */
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+}

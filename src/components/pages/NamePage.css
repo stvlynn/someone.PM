@@ -1,0 +1,81 @@
+/* Name page styles */
+.third-page {
+  /* allow additional scroll room for sticky + exit animation */
+  height: auto;
+  min-height: 180vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.third-container {
+  width: 100%;
+  max-width: 64rem; /* ~1024px */
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Third page sticky behavior (mirror of content-container.sticky-content) */
+.third-container.third-sticky {
+  position: fixed !important;
+  top: 50% !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: translateY(-50%) !important;
+  z-index: 25 !important;
+  width: 100% !important;
+}
+
+/* Third page title matches second page font & size */
+.third-title {
+  font-family: "Jersey 20", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 4rem;
+  color: white;
+  line-height: 1.1;
+  text-align: center;
+}
+
+/* Third page two-column layout */
+.third-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 2rem;
+}
+
+.sticky-left {
+  position: sticky;
+  top: 50vh; /* stick when the top reaches the center of viewport */
+  transform: translateY(-50%);
+}
+
+.right-stage {
+  position: relative;
+  min-height: 60vh;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.right-name {
+  opacity: 1; /* fully visible, above now-semi-transparent hover effect */
+  text-align: center;
+}
+
+.right-hover {
+  pointer-events: auto;
+  min-height: 400px;
+}
+
+@media (max-width: 900px) {
+  .third-grid {
+    grid-template-columns: 1fr;
+  }
+  .sticky-left {
+    top: 20vh;
+  }
+}
