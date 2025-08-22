@@ -1,0 +1,72 @@
+projects:
+  - name: Twi.am
+    description: A Twitter MBTI personality analysis tool that infers users' personality types through their Twitter behavior, combining social media analytics with psychological theories.
+    image: https://s2.loli.net/2025/08/23/5kl4ve8zXFw1jWZ.png
+    url: https://github.com/stvlynn/twi.am
+    tech: [Next.js, TailwindCSS, Twitter API]
+
+  - name: Hello Dify
+    description: The most comprehensive online Dify tutorial, powered by FirstLab.
+    image: https://s2.loli.net/2025/08/23/u8G7rFh2I5QPZUD.png
+    url: https://github.com/stvlynn/hello-dify
+    tech: [Next.js, TailwindCSS, Fumadocs]
+
+  - name: someone.PM
+    description: a minimalist personal navigation site that replaces the traditional card grid with a single, powerful search box.
+    image: https://s2.loli.net/2025/08/23/5jsgFmhTw2dv1CB.png
+    url: https://github.com/stvlynn/someone.pm
+    tech: [React, TailwindCSS]
+    
+
+  - name: Modify
+    description: A mobile chat application built on the Dify AI platform, providing an intuitive interface for AI-powered conversations and natural language interactions.
+    image: https://s2.loli.net/2025/08/23/be9HMPrnTRgtc8l.png
+    url: https://github.com/stvlynn/modify
+    tech: [React Native, Dify API, TypeScript]
+
+  - name: Flashcard
+    description: An open-source alternative to Duolingo, featuring a modern UI and multi-language support for intelligent language learning through AI-powered flashcards.
+    image: https://s2.loli.net/2025/08/23/BtWKEbQx5SDGPpC.png
+    url: https://github.com/stvlynn/flashcard
+    tech: [Next.js, TailwindCSS, Dify API]
+
+  - name: EasyReceiptSwift
+    description: A Swift-based iOS app that uses LLM vision technology to scan receipts and automatically sync the data to Feishu or Google Sheets.
+    image: https://s2.loli.net/2025/08/23/oTbYdtaKW4AOuEi.png
+    url: https://github.com/stvlynn/EasyReceiptSwift
+    tech: [Swift, Vision API, Google Sheets API]
+
+  - name: TwitterInstantPortrait
+    description: An AI-powered tool that generates instant artistic portraits from Twitter profile pictures, combining computer vision with artistic style transfer.
+    image: https://s2.loli.net/2025/08/23/XGLbA1zFIsnQgTt.png
+    url: https://github.com/stvlynn/TwitterInstantPortrait
+    tech: [Python, TensorFlow, Twitter API]
+
+  - name: TwitterYearlyKanji
+    description: A data visualization project that analyzes and displays the most frequently used Kanji characters on Twitter throughout the year.
+    image: https://s2.loli.net/2025/08/23/igx3aISNKyPpDOQ.png
+    url: https://github.com/stvlynn/TwitterYearlyKanji
+    tech: [D3.js, Node.js, Twitter API]
+
+  - name: LangFixer
+    description: A tool for checking and maintaining consistency between multiple language versions of text, helping developers and content creators manage multilingual content.
+    image: https://camo.githubusercontent.com/7558ff14d94231575f7938922586655f7260a2e9a6de471c88826adc6b7f1068/68747470733a2f2f63646e2e737461746963616c6c792e696f2f67682f7374766c796e6e2f636c6f7564696d67406d61737465722f626c6f672f323331302f254536253838254141254535254231253846323032342d31312d32342d30312e34362e34302e357671377067667373756f302e77656270
+    url: https://github.com/stvlynn/langfixer
+    tech: [TypeScript, i18n, React]
+
+ui:
+  fourthRight:
+    base:
+      opacity: 1
+      translateY: 0
+      transition: none
+    exit:
+      translateY: -36
+      transition: "opacity 0.6s ease-out, transform 0.6s ease-out"
+    scroll:
+      fadeOutStart: 1.2     # when to start fading/moving out
+      fadeOutWindow: 0.25   # how long until fully out
+      moveOutPx: 40         # how many px to move during fadeOutWindow
+  cards:
+    itemGap: 24            # px gap between cards
+    itemMinHeight: 200     # px slot height for each card (card should fit within)

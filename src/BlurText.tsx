@@ -124,6 +124,11 @@ const BlurText: React.FC<BlurTextProps> = ({
           ease: easing,
         };
 
+        // Handle line breaks
+        if (segment === '\n') {
+          return <br key={index} />;
+        }
+
         return (
           <motion.span
             key={index}

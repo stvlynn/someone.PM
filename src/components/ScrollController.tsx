@@ -5,11 +5,16 @@ interface ScrollControllerProps {
   contentContainerRef: React.RefObject<HTMLDivElement | null>
   thirdSectionRef: React.RefObject<HTMLElement | null>
   thirdContainerRef: React.RefObject<HTMLDivElement | null>
+  fourthSectionRef: React.RefObject<HTMLElement | null>
+  fourthContainerRef: React.RefObject<HTMLDivElement | null>
   onScrollProgressChange: (progress: number) => void
   onContentStickyChange: (sticky: boolean) => void
   onThirdProgressChange: (progress: number) => void
   onThirdRawProgressChange: (rawProgress: number) => void
   onThirdStickyChange: (sticky: boolean) => void
+  onFourthProgressChange: (progress: number) => void
+  onFourthRawProgressChange: (rawProgress: number) => void
+  onFourthStickyChange: (sticky: boolean) => void
 }
 
 export default function ScrollController({
@@ -17,11 +22,16 @@ export default function ScrollController({
   contentContainerRef,
   thirdSectionRef,
   thirdContainerRef,
+  fourthSectionRef,
+  fourthContainerRef,
   onScrollProgressChange,
   onContentStickyChange,
   onThirdProgressChange,
   onThirdRawProgressChange,
-  onThirdStickyChange
+  onThirdStickyChange,
+  onFourthProgressChange,
+  onFourthRawProgressChange,
+  onFourthStickyChange
 }: ScrollControllerProps) {
   useEffect(() => {
     const handleScroll = () => {
@@ -58,6 +68,18 @@ export default function ScrollController({
         const thirdShouldStick = scrollY > thirdTop - windowHeight * 0.6 && thirdRaw < thirdRelease && thirdRaw > -0.15
         onThirdStickyChange(thirdShouldStick)
       }
+
+      // ---- Fourth page progress & sticky ----
+      if (fourthSectionRef.current && fourthContainerRef.current) {
+        const fourthTop = fourthSectionRef.current.offsetTop
+        const fourthRaw = (scrollY - (fourthTop - windowHeight * 0.2)) / (windowHeight * 0.9)
+        onFourthRawProgressChange(fourthRaw)
+        const fourthExt = Math.max(0, fourthRaw)
+        onFourthProgressChange(fourthExt)
+        const fourthRelease = 1.35
+        const fourthShouldStick = scrollY > fourthTop - windowHeight * 0.6 && fourthRaw < fourthRelease && fourthRaw > -0.15
+        onFourthStickyChange(fourthShouldStick)
+      }
     }
 
     window.addEventListener('scroll', handleScroll)
@@ -69,11 +91,16 @@ export default function ScrollController({
     contentContainerRef,
     thirdSectionRef,
     thirdContainerRef,
+    fourthSectionRef,
+    fourthContainerRef,
     onScrollProgressChange,
     onContentStickyChange,
     onThirdProgressChange,
     onThirdRawProgressChange,
-    onThirdStickyChange
+    onThirdStickyChange,
+    onFourthProgressChange,
+    onFourthRawProgressChange,
+    onFourthStickyChange
   ])
 
   return null

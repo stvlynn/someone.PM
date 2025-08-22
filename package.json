@@ -15,6 +15,7 @@
     "clsx": "^2.1.1",
     "gsap": "^3.13.0",
     "iconoir-react": "^7.11.0",
+    "js-yaml": "^4.1.0",
     "lucide-react": "^0.540.0",
     "matter-js": "^0.20.0",
     "motion": "^12.23.12",
