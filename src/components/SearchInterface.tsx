@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { Send, Code, Twitter, Telegram, Github, Instagram, NavArrowRight } from 'iconoir-react';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
 
@@ -34,7 +34,7 @@ export default function SearchInterface() {
     url: string;
   };
 
-  const IconById: Record<string, (props: { className?: string }) => JSX.Element> = {
+  const IconById: Record<string, (props: { className?: string }) => ReactElement> = {
     twitter: (p) => <Twitter className={p.className} />,
     telegram: (p) => <Telegram className={p.className} />,
     github: (p) => <Github className={p.className} />,
