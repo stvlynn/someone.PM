@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import './App.css'
 import SearchPage from './components/pages/SearchPage'
 import ContentPage from './components/pages/ContentPage'
@@ -8,7 +8,6 @@ import ScrollController from './components/ScrollController'
 import GlobalEffects from './components/GlobalEffects'
 
 function App() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isContentSticky, setIsContentSticky] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0) // 0..1 progress for second section
@@ -27,18 +26,10 @@ function App() {
   const fourthSectionRef = useRef<HTMLElement>(null)
   const fourthContainerRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [])
 
   return (
     <>
-      <GlobalEffects mousePosition={mousePosition} isImageHovered={isImageHovered} />
+      <GlobalEffects isImageHovered={isImageHovered} />
 
       {/* First Page - Search Interface */}
       <SearchPage isImageHovered={isImageHovered} />

@@ -1,12 +1,41 @@
+import { useEffect, useRef } from 'react'
 import Dither from './Dither'
 import './GlobalEffects.css'
 
 interface GlobalEffectsProps {
-  mousePosition: { x: number; y: number }
   isImageHovered: boolean
 }
 
-export default function GlobalEffects({ mousePosition, isImageHovered }: GlobalEffectsProps) {
+export default function GlobalEffects({ isImageHovered }: GlobalEffectsProps) {
+  const cursorDotRef = useRef<HTMLDivElement>(null)
+  const animationFrameRef = useRef<number | undefined>()
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // Cancel any pending animation frame
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
+      
+      // Use requestAnimationFrame to update transform for smooth 60fps updates
+      animationFrameRef.current = requestAnimationFrame(() => {
+        if (cursorDotRef.current) {
+          // Use transform instead of left/top to avoid layout recalculation
+          cursorDotRef.current.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`
+        }
+      })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
+    }
+  }, [])
+
   return (
     <>
       {/* Global Dither Background */}
@@ -25,12 +54,14 @@ export default function GlobalEffects({ mousePosition, isImageHovered }: GlobalE
         />
       </div>
       
-      {/* Global Cursor Dot */}
+      {/* Global Cursor Dot - using transform for better performance */}
       <div 
+        ref={cursorDotRef}
         className="cursor-dot"
         style={{
-          left: mousePosition.x,
-          top: mousePosition.y
+          left: 0,
+          top: 0,
+          transform: 'translate(0px, 0px)'
         }}
       />
 
