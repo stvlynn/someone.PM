@@ -8,12 +8,12 @@ interface GlobalEffectsProps {
 
 export default function GlobalEffects({ isImageHovered }: GlobalEffectsProps) {
   const cursorDotRef = useRef<HTMLDivElement>(null)
-  const animationFrameRef = useRef<number | undefined>()
+  const animationFrameRef = useRef<number | null>(null)
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       // Cancel any pending animation frame
-      if (animationFrameRef.current) {
+      if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current)
       }
       
@@ -30,7 +30,7 @@ export default function GlobalEffects({ isImageHovered }: GlobalEffectsProps) {
     
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
-      if (animationFrameRef.current) {
+      if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
