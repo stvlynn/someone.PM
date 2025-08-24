@@ -185,6 +185,11 @@ export default function ProjectsPage({
             isTilted={false}
             tiltDirection="right"
             listenTarget={fourthSectionRef.current as HTMLElement | null}
+            // Stronger slowdown for scroll/drag + longer easing
+            wheelMultiplier={0.6}
+            dragMultiplier={0.35}
+            interactionDuration={0.6}
+            interactionEase="power2.out"
             loop={false}
             onBoundaryReached={(boundary) => {
               console.log(`Reached ${boundary} boundary - trigger exit effect`);

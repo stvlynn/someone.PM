@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { Send, Code, Twitter, Telegram, Github, Instagram, NavArrowRight } from 'iconoir-react';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
-// Load socials from src/data at build-time; fallback to public fetch if needed
+import { Bouncy } from 'ldrs/react';
+import 'ldrs/react/Bouncy.css';
+// Load socials and projects from src/data at build-time
 import socialsYamlRaw from '../data/socials.yaml?raw';
+import projectsYamlRaw from '../data/projects.yaml?raw';
 
 export default function SearchInterface() {
   const [query, setQuery] = useState('');
@@ -15,6 +18,7 @@ export default function SearchInterface() {
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault?.();
@@ -34,6 +38,10 @@ export default function SearchInterface() {
     username: string;
     icon: string; // id from YAML
     url: string;
+    type: 'social' | 'project';
+    description?: string;
+    image?: string;
+    tech?: string[];
   };
 
   const IconById: Record<string, (props: { className?: string }) => ReactElement> = {
@@ -41,6 +49,7 @@ export default function SearchInterface() {
     telegram: (p) => <Telegram className={p.className} />,
     github: (p) => <Github className={p.className} />,
     instagram: (p) => <Instagram className={p.className} />,
+    project: (p) => <Code className={p.className} />,
   };
 
   // very small YAML parser for our flat list structure (src/data/socials.yaml or public/socials.yaml)
@@ -48,7 +57,7 @@ export default function SearchInterface() {
     const lines = text.split(/\r?\n/);
     const items: SocialItem[] = [];
     let current: Partial<SocialItem> | null = null;
-    for (let raw of lines) {
+    for (const raw of lines) {
       const line = raw.trim();
       if (!line || line.startsWith('#')) continue;
       if (line.startsWith('items:')) continue;
@@ -63,7 +72,7 @@ export default function SearchInterface() {
         const afterDash = line.slice(2).trim();
         if (afterDash.includes(':')) {
           const [k, v] = afterDash.split(/:\s*/, 2);
-          (current as any)[k] = v;
+          (current as Record<string, string>)[k] = v;
         }
         continue;
       }
@@ -73,7 +82,7 @@ export default function SearchInterface() {
         let val = m[2];
         // strip quotes if any
         val = val.replace(/^"|"$/g, '').replace(/^'|'$/g, '');
-        (current as any)[key] = val;
+        (current as Record<string, string>)[key] = val;
       }
     }
     if (current) {
@@ -84,40 +93,131 @@ export default function SearchInterface() {
     return items;
   }
 
-  async function loadSocials() {
+  // YAML parser for projects structure
+  function parseProjectsYaml(text: string): SocialItem[] {
+    const lines = text.split(/\r?\n/);
+    const items: SocialItem[] = [];
+    let inProjects = false;
+    let current: Partial<SocialItem> | null = null;
+    
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line || line.startsWith('#')) continue;
+      
+      if (line.startsWith('projects:')) {
+        inProjects = true;
+        continue;
+      }
+      
+      if (line.startsWith('ui:') || line.startsWith('fourthRight:') || line.startsWith('base:') || line.startsWith('exit:') || line.startsWith('scroll:') || line.startsWith('cards:')) {
+        inProjects = false;
+        continue;
+      }
+      
+      if (inProjects && line.startsWith('- name:')) {
+        if (current) {
+          if (current.name && current.url) {
+            items.push({
+              id: current.name.toLowerCase().replace(/\s+/g, '-'),
+              name: current.name,
+              username: '',
+              icon: 'project',
+              url: current.url,
+              type: 'project',
+              description: current.description,
+              image: current.image,
+              tech: current.tech,
+            } as SocialItem);
+          }
+        }
+        current = { name: line.slice(7).trim(), type: 'project' as const };
+        continue;
+      }
+      
+      if (inProjects && current) {
+        if (line.startsWith('description:')) {
+          current.description = line.slice(12).trim();
+        } else if (line.startsWith('image:')) {
+          current.image = line.slice(7).trim();
+        } else if (line.startsWith('url:')) {
+          current.url = line.slice(4).trim();
+        } else if (line.startsWith('tech:')) {
+          // 简单的数组解析
+          const techMatch = line.match(/tech:\s*\[(.*?)\]/);
+          if (techMatch) {
+            current.tech = techMatch[1].split(',').map(t => t.trim().replace(/['"]/g, ''));
+          }
+        }
+      }
+    }
+    
+    if (current && current.name && current.url) {
+      items.push({
+        id: current.name.toLowerCase().replace(/\s+/g, '-'),
+        name: current.name,
+        username: '',
+        icon: 'project',
+        url: current.url,
+        type: 'project',
+        description: current.description,
+        image: current.image,
+        tech: current.tech,
+      } as SocialItem);
+    }
+    
+    return items;
+  }
+
+  async function loadData() {
     try {
-      // 1) Preferred: bundled raw file from src/data/socials.yaml
+      // Load socials data
       if (!(typeof socialsYamlRaw === 'string' && socialsYamlRaw.length > 0)) {
         throw new Error('socials.yaml is missing or empty under src/data');
       }
-      const items = parseSocialYaml(socialsYamlRaw);
-      setSocials(items);
-      setSuggestions(items);
+      const socialItems = parseSocialYaml(socialsYamlRaw);
+      
+      // Load projects data
+      if (!(typeof projectsYamlRaw === 'string' && projectsYamlRaw.length > 0)) {
+        throw new Error('projects.yaml is missing or empty under src/data');
+      }
+      const projectItems = parseProjectsYaml(projectsYamlRaw);
+      
+      // Combine all items
+      const allItems = [...socialItems, ...projectItems];
+      setSocials(allItems);
+      setSuggestions(allItems);
     } catch (e) {
-      console.error('Failed to load socials.yaml from src/data', e);
+      console.error('Failed to load data from src/data', e);
     }
   }
 
   useEffect(() => {
-    loadSocials();
+    loadData();
   }, []);
 
   // local lightweight similarity as fallback
   function localRank(q: string, items: SocialItem[]): SocialItem[] {
     const s = q.toLowerCase();
     const scored = items.map((it) => {
-      const hay = `${it.name} ${it.id} ${it.username}`.toLowerCase();
+      const hay = `${it.name} ${it.id} ${it.username} ${it.description || ''} ${it.tech?.join(' ') || ''}`.toLowerCase();
       let score = 0;
       if (hay.startsWith(s)) score += 3;
       if (hay.includes(s)) score += 1;
       if (it.name.toLowerCase().startsWith(s)) score += 2;
+      if (it.description && it.description.toLowerCase().includes(s)) score += 2;
       return { it, score };
     });
     return scored.sort((a, b) => b.score - a.score).map((x) => x.it);
   }
 
   async function llmRank(q: string, items: SocialItem[]): Promise<SocialItem[] | null> {
+    const enableAISearch = import.meta.env.VITE_ENABLE_AI_SEARCH === 'true';
+    if (!enableAISearch) return null;
+
     const key = import.meta.env.VITE_OPENAI_API_KEY as string | undefined;
+    const baseURL = import.meta.env.VITE_OPENAI_BASE_URL as string | undefined || 'https://api.openai.com/v1';
+    const model = import.meta.env.VITE_OPENAI_MODEL as string | undefined || 'gpt-4o-mini';
+    
     if (!key) return null;
 
     try {
@@ -126,24 +226,63 @@ export default function SearchInterface() {
       abortRef.current = controller;
       setLoadingLLM(true);
 
-      const system = `You are a ranking function. Given a user query string and a list of social entries, return a JSON array named \"results\" with objects {id, reason} sorted by best match. Only include ids from the input list.`;
+      // 构建完整的上下文，包含所有YAML数据
+      const context = `
+SOCIAL LINKS:
+${socialsYamlRaw}
+
+PROJECTS:
+${projectsYamlRaw}
+`;
+
+      const system = `You are an intelligent search assistant for a personal website. Given a user query and the complete data context (social links and projects), find and rank the most relevant matches.
+
+Your task:
+1. Analyze the user's query against all available data (social links and projects)
+2. Return a JSON array of results sorted by relevance
+3. Each result should include: id, name, type, description (if available), and a relevance score (1-10)
+4. Only return items that are actually relevant to the query
+5. For projects, consider descriptions and technologies
+6. For social links, consider names and usernames
+
+Return exactly this JSON structure:
+{
+  "results": [
+    {
+      "id": "string",
+      "name": "string", 
+      "type": "social" | "project",
+      "description": "string (if available)",
+      "score": number
+    }
+  ]
+}`;
+
       const user = {
         query: q,
-        items: items.map((x) => ({ id: x.id, name: x.name, username: x.username }))
+        context: context,
+        available_items: items.map((x) => ({
+          id: x.id,
+          name: x.name,
+          type: x.type,
+          description: x.description,
+          username: x.username,
+          tech: x.tech
+        }))
       };
 
-      const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+      const resp = await fetch(`${baseURL}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${key}`,
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: model,
           temperature: 0,
           messages: [
             { role: 'system', content: system },
-            { role: 'user', content: `Query: ${q}\nItems: ${JSON.stringify(user.items)}\nReturn only JSON like {\"results\":[{\"id\":string,\"reason\":string}]}` },
+            { role: 'user', content: `Query: ${user.query}\n\nContext:\n${user.context}\n\nAvailable Items:\n${JSON.stringify(user.available_items, null, 2)}` },
           ],
           response_format: { type: 'json_object' },
         }),
@@ -151,19 +290,32 @@ export default function SearchInterface() {
       });
       const data = await resp.json();
       const text = data.choices?.[0]?.message?.content ?? '{}';
-      const parsed = JSON.parse(text) as { results?: { id: string }[] };
-      const order = parsed.results?.map((r) => r.id) ?? [];
-      if (!order.length) return null;
+      const parsed = JSON.parse(text) as { results?: { id: string; score: number }[] };
+      const results = parsed.results ?? [];
+      
+      if (!results.length) return null;
+      
+      // 按分数排序并获取项目
+      const sortedResults = results.sort((a, b) => b.score - a.score);
       const map = new Map(items.map((x) => [x.id, x] as const));
       const ranked: SocialItem[] = [];
-      for (const id of order) {
-        const hit = map.get(id);
+      
+      for (const result of sortedResults) {
+        const hit = map.get(result.id);
         if (hit) ranked.push(hit);
       }
-      // append any missing items
-      for (const it of items) if (!order.includes(it.id)) ranked.push(it);
+      
+      // 如果没有找到匹配的结果，返回本地排序的结果
+      if (!ranked.length) {
+        return localRank(q, items);
+      }
+      
       return ranked;
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // 请求被取消是正常行为，不需要记录警告
+        return null;
+      }
       console.warn('LLM rank failed, fallback to local', err);
       return null;
     } finally {
@@ -174,13 +326,20 @@ export default function SearchInterface() {
   // Handle item selection
   const handleSelectItem = (item: SocialItem) => {
     setSelectedItem(item);
-    setQuery(`${item.name} (${item.username})`);
+    const displayText = item.type === 'project' 
+      ? item.name 
+      : `${item.name} (${item.username})`;
+    setQuery(displayText);
     setSuggestions([]); // Clear suggestions dropdown
     setHighlightedIndex(-1);
   };
 
-  // recompute suggestions on query change
+  // recompute suggestions on query change with debounce
   useEffect(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    
     const run = async () => {
       if (!query.trim()) {
         setSuggestions(socials);
@@ -192,8 +351,15 @@ export default function SearchInterface() {
       const llm = await llmRank(query, socials);
       setSuggestions(llm && llm.length ? llm : local);
     };
-    run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
+    // 防抖：300ms 后执行搜索
+    debounceRef.current = setTimeout(run, 300);
+    
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
   }, [query, socials]);
 
   // Handle click outside to blur
@@ -235,7 +401,7 @@ export default function SearchInterface() {
             <div className="w-10 flex items-center justify-center shrink-0">
               {selectedItem ? (
                 (() => {
-                  const Icon = IconById[selectedItem.icon] ?? ((p: any) => <Code {...p} />);
+                  const Icon = IconById[selectedItem.icon] ?? ((p: { className?: string }) => <Code {...p} />);
                   return <Icon className="w-5 h-5 text-white/80" />;
                 })()
               ) : (
@@ -307,7 +473,7 @@ export default function SearchInterface() {
                 inactiveZone={0.01}
               />
               {suggestions.slice(0, 5).map((s, index) => {
-                const Icon = IconById[s.icon] ?? ((p: any) => <Code {...p} />);
+                const Icon = IconById[s.icon] ?? ((p: { className?: string }) => <Code {...p} />);
                 return (
                   <div key={s.id}>
                     <div
@@ -324,9 +490,16 @@ export default function SearchInterface() {
                       <div className="w-10 flex items-center justify-center shrink-0">
                         <Icon className="w-5 h-5 text-white/80" />
                       </div>
-                      <div className="ml-3 flex-1 flex items-center gap-3 min-w-0">
-                        <span className="text-white whitespace-nowrap">{s.name}</span>
-                        <span className="text-white/60 whitespace-nowrap">{s.username}</span>
+                      <div className="ml-3 flex-1 flex flex-col gap-1 min-w-0">
+                        <div className="flex items-center gap-3">
+                          <span className="text-white whitespace-nowrap">{s.name}</span>
+                          {s.type === 'social' && (
+                            <span className="text-white/60 whitespace-nowrap">{s.username}</span>
+                          )}
+                        </div>
+                        {s.description && (
+                          <span className="text-white/60 text-sm line-clamp-1">{s.description}</span>
+                        )}
                       </div>
                       <div className="w-10 flex items-center justify-center shrink-0 opacity-80">
                         <NavArrowRight className="w-5 h-5 text-white/80" />
@@ -339,7 +512,14 @@ export default function SearchInterface() {
                 );
               })}
               {loadingLLM && (
-                <div className="px-10 py-3 text-sm text-white/70 border-t border-white/10">Refining with AI…</div>
+                <div className="flex items-center justify-center gap-3 px-6 py-4 text-sm text-white/70 border-t border-white/10">
+                  <Bouncy
+                    size="20"
+                    speed="1.75"
+                    color="rgba(255, 255, 255, 0.7)"
+                  />
+                  <span>Refining with AI…</span>
+                </div>
               )}
             </div>
           )}

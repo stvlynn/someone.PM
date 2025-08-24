@@ -24,6 +24,9 @@ interface InfiniteScrollProps {
   // Interaction speed multipliers
   wheelMultiplier?: number; // applied to wheel delta
   dragMultiplier?: number;  // applied to drag delta
+  // Interaction animation controls (non-loop mode)
+  interactionDuration?: number; // duration of the snap animation when interacting
+  interactionEase?: string; // easing function for the interaction animation
   // If provided, component follows this external progress (e.g., raw page progress)
   driveProgress?: number; // raw progress value that can be negative/positive
   drivePixelPerUnit?: number; // how many pixels to move per 1 unit of progress delta
@@ -48,6 +51,8 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
   pauseOnHover = false,
   wheelMultiplier = 6,
   dragMultiplier = 3,
+  interactionDuration = 0.4,
+  interactionEase = 'expo.out',
   driveProgress,
   drivePixelPerUnit = 240,
   driveScrollFactor = -1,
@@ -62,6 +67,7 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
   const totalHeightRef = useRef<number>(0);
   const prevProgressRef = useRef<number | undefined>(undefined);
   const baseOffsetRef = useRef<number>(0); // shared offset for non-loop mode
+  const wrapperHeightRef = useRef<number>(0); // cache wrapper height for boundary logic
 
   const getTiltTransform = (): string => {
     if (!isTilted) return "none";
@@ -100,6 +106,16 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
 
     // Snapping helper to avoid sub-pixel jitter (reuse variable)
 
+    // Measure wrapper height for center-based boundary logic
+    const measureWrapper = () => {
+      const wrapperEl = wrapperRef.current;
+      if (wrapperEl) {
+        wrapperHeightRef.current = wrapperEl.clientHeight;
+      }
+    };
+    measureWrapper();
+    window.addEventListener('resize', measureWrapper);
+
     // initialize progress baseline if in drive mode
     if (driveProgress !== undefined) {
       prevProgressRef.current = driveProgress;
@@ -120,7 +136,9 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
         const d = (event as any).type === "wheel" ? -deltaY : deltaY;
         const distance = isDragging ? d * dragMultiplier : d * wheelMultiplier;
         if (!loop) {
-          const upperBound = totalItemHeight; // max
+          // Use wrapper midpoint so we trigger when the first card's top hits center
+          const halfWrapper = wrapperHeightRef.current > 0 ? wrapperHeightRef.current / 2 : totalItemHeight;
+          const upperBound = Math.min(halfWrapper, totalItemHeight * 1.0);
           const lowerBound = -totalHeight + totalItemHeight; // min
           const nextBase = baseOffsetRef.current + distance;
           const clamped = Math.max(lowerBound, Math.min(upperBound, nextBase));
@@ -136,8 +154,8 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
           baseOffsetRef.current = clamped;
           divItems.forEach((child, i) => {
             gsap.to(child, {
-              duration: 0.4,
-              ease: 'expo.out',
+              duration: interactionDuration,
+              ease: interactionEase,
               y: snapY(baseOffsetRef.current + i * totalItemHeight),
             });
           });
@@ -184,11 +202,13 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
           stopTicker();
           container.removeEventListener("mouseenter", stopTicker);
           container.removeEventListener("mouseleave", startTicker);
+          window.removeEventListener('resize', measureWrapper);
         };
       } else {
         return () => {
           observer.kill();
           rafId && cancelAnimationFrame(rafId);
+          window.removeEventListener('resize', measureWrapper);
         };
       }
     }
@@ -196,6 +216,7 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
     return () => {
       observer.kill();
       if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', measureWrapper);
     };
   }, [
     items,
