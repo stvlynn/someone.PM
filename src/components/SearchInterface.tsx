@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { Send, Code, Twitter, Telegram, Github, Instagram, NavArrowRight } from 'iconoir-react';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
-// Prefer unified data path under src/data; fallback to public fetch for backward compatibility
-const socialsRawModules = import.meta.glob('../../data/socials.yaml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+// Load socials from src/data at build-time; fallback to public fetch if needed
+import socialsYamlRaw from '../data/socials.yaml?raw';
 
 export default function SearchInterface() {
   const [query, setQuery] = useState('');
@@ -87,23 +87,14 @@ export default function SearchInterface() {
   async function loadSocials() {
     try {
       // 1) Preferred: bundled raw file from src/data/socials.yaml
-      const modPaths = Object.keys(socialsRawModules);
-      if (modPaths.length > 0) {
-        const txt = socialsRawModules[modPaths[0]];
-        const items = parseSocialYaml(txt);
-        setSocials(items);
-        setSuggestions(items);
-        return;
+      if (!(typeof socialsYamlRaw === 'string' && socialsYamlRaw.length > 0)) {
+        throw new Error('socials.yaml is missing or empty under src/data');
       }
-      // 2) Fallback: fetch from public root (public/socials.yaml)
-      const res = await fetch('/socials.yaml');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const txt = await res.text();
-      const items = parseSocialYaml(txt);
+      const items = parseSocialYaml(socialsYamlRaw);
       setSocials(items);
       setSuggestions(items);
     } catch (e) {
-      console.error('Failed to load socials.yaml (both src/data and public)', e);
+      console.error('Failed to load socials.yaml from src/data', e);
     }
   }
 
