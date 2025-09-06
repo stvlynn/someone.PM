@@ -136,9 +136,12 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
         const d = (event as any).type === "wheel" ? -deltaY : deltaY;
         const distance = isDragging ? d * dragMultiplier : d * wheelMultiplier;
         if (!loop) {
-          // Use wrapper midpoint so we trigger when the first card's top hits center
+          // Use wrapper midpoint but align by the first card's center
+          // Only release to native page scroll once the first card's CENTER
+          // reaches the wrapper's center (avoids early flip when returning).
           const halfWrapper = wrapperHeightRef.current > 0 ? wrapperHeightRef.current / 2 : totalItemHeight;
-          const upperBound = Math.min(halfWrapper, totalItemHeight * 1.0);
+          const centerAlignedTop = halfWrapper - (itemHeight / 2);
+          const upperBound = Math.min(centerAlignedTop, totalItemHeight * 1.0);
           const lowerBound = -totalHeight + totalItemHeight; // min
           const nextBase = baseOffsetRef.current + distance;
           const clamped = Math.max(lowerBound, Math.min(upperBound, nextBase));

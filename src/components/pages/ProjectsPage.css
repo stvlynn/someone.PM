@@ -51,15 +51,13 @@
 
 .right-stage {
   position: relative;
-  min-height: 60vh;
-  height: 400px;
+  height: 100vh; /* fill viewport height to align top/bottom with screen */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Cards inside InfiniteScroll */
-.infinite-scroll-container { cursor: grab; }
+/* Cards */
 .proj-card {
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.12);
