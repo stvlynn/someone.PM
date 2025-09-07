@@ -84,7 +84,7 @@ export default function AlbumPage({
         >
           <div>
             <BlurText
-              text="Photo Album"
+              text="Light And Shadow,"
               className="fifth-title"
               animateBy="letters"
               delay={200}
@@ -95,7 +95,7 @@ export default function AlbumPage({
             />
             {showLine2 && (
               <BlurText
-                text="Places and Moments"
+                text="Collected"
                 className="fifth-title"
                 animateBy="letters"
                 direction="top"
