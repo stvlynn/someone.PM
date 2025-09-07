@@ -8,6 +8,7 @@ import AlbumPage from './components/pages/AlbumPage'
 import RejectedByPage from './components/pages/RejectedByPage'
 import ScrollController from './components/ScrollController'
 import GlobalEffects from './components/GlobalEffects'
+import SeoHead from '@/components/SeoHead'
 
 function App() {
   const [isImageHovered, setIsImageHovered] = useState(false)
@@ -37,6 +38,7 @@ function App() {
 
   return (
     <>
+      <SeoHead />
       <GlobalEffects isImageHovered={isImageHovered} />
 
       {/* First Page - Search Interface */}

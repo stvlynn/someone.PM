@@ -1,0 +1,19 @@
+site:
+  title: "PM to Steven Lynn"
+  description: "Ask anything about Steven Lynn and PM!"
+  baseUrl: "https://stv.pm"
+  favicon: "/favicon.jpeg"
+  themeColor: "#0b0b0b"
+  og:
+    title: "PM to Steven Lynn"
+    description: "Explore Steven Lynn's projects, socials, and answers with AI search."
+    type: "website"
+    url: "https://stv.pm"
+    image: "/favicon.jpeg"
+    imageAlt: "PM — Steven Open Graph Image"
+    siteName: "PM Steven Lynn"
+  twitter:
+    card: "summary_large_image"
+    site: "@stv_lynn"
+    creator: "@stv_lynn"
+
