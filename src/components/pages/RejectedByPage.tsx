@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import LogoLoop from '@/components/LogoLoop'
 import './RejectedByPage.css'
 import yaml from 'js-yaml'
