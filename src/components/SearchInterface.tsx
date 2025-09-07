@@ -601,7 +601,7 @@ Return exactly this JSON structure (nothing else):
                   inputRef.current?.blur();
                 }
               }}
-              placeholder="Type Anything..."
+              placeholder="Wanna know about me?"
               role="combobox"
               aria-expanded={Boolean(query && (suggestions.length > 0 || !!roleplayReply))}
               aria-controls="search-suggestions"

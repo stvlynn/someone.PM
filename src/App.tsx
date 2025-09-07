@@ -5,6 +5,7 @@ import ContentPage from './components/pages/ContentPage'
 import NamePage from './components/pages/NamePage'
 import ProjectsPage from './components/pages/ProjectsPage'
 import AlbumPage from './components/pages/AlbumPage'
+import RejectedByPage from './components/pages/RejectedByPage'
 import ScrollController from './components/ScrollController'
 import GlobalEffects from './components/GlobalEffects'
 
@@ -77,6 +78,9 @@ function App() {
         fifthSectionRef={fifthSectionRef}
         fifthContainerRef={fifthContainerRef}
       />
+
+      {/* Sixth Page - Rejected By */}
+      <RejectedByPage />
 
       {/* Scroll Controller */}
       <ScrollController
