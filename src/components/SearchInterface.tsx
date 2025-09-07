@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
-import { Send, Code, Twitter, Telegram, Github, Instagram, NavArrowRight } from 'iconoir-react';
+import { Send, Code, Twitter, Telegram, Github, Instagram, NavArrowRight, BubbleStar } from 'iconoir-react';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { Bouncy } from 'ldrs/react';
 import 'ldrs/react/Bouncy.css';
+import DecryptedText from '@/components/DecryptedText';
 // Load socials and projects from src/data at build-time
 import socialsYamlRaw from '../data/socials.yaml?raw';
 import projectsYamlRaw from '../data/projects.yaml?raw';
@@ -22,6 +23,7 @@ export default function SearchInterface() {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const enableAISearch = import.meta.env.VITE_ENABLE_AI_SEARCH === 'true';
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault?.();
@@ -33,6 +35,12 @@ export default function SearchInterface() {
   };
 
   const handleClick = () => handleSubmit();
+  const track = (event: string, props?: Record<string, unknown>) => {
+    // Lightweight analytics stub; replace with real tracker if available
+    try {
+      console.debug(`[analytics] ${event}`, props || {});
+    } catch {}
+  };
 
   // --- Types & helpers ---
   type SocialItem = {
@@ -171,6 +179,32 @@ export default function SearchInterface() {
     return items;
   }
 
+  // Highlight helper for search matches
+  function escapeRegExp(str: string) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+  function highlightText(text?: string, q?: string) {
+    if (!text) return '';
+    if (!q || !q.trim()) return text;
+    try {
+      const re = new RegExp(`(${escapeRegExp(q)})`, 'ig');
+      const parts = text.split(re);
+      return (
+        <>
+          {parts.map((part, i) =>
+            part.toLowerCase() === q.toLowerCase() ? (
+              <span key={i} className="text-emerald-300">{part}</span>
+            ) : (
+              <span key={i}>{part}</span>
+            )
+          )}
+        </>
+      );
+    } catch {
+      return text;
+    }
+  }
+
   async function loadData() {
     try {
       // Load socials data
@@ -240,7 +274,6 @@ export default function SearchInterface() {
   }
 
   async function roleplayLLM(q: string): Promise<{ reply: string; options: SocialItem[] } | null> {
-    const enableAISearch = import.meta.env.VITE_ENABLE_AI_SEARCH === 'true';
     if (!enableAISearch) return null;
 
     const key = import.meta.env.VITE_OPENAI_API_KEY as string | undefined;
@@ -327,7 +360,6 @@ export default function SearchInterface() {
   };
 
   async function llmRankDecision(q: string, items: SocialItem[]): Promise<LlmDecision> {
-    const enableAISearch = import.meta.env.VITE_ENABLE_AI_SEARCH === 'true';
     if (!enableAISearch) return { list: null, shouldRoleplay: false };
 
     const key = import.meta.env.VITE_OPENAI_API_KEY as string | undefined;
@@ -460,6 +492,22 @@ Return exactly this JSON structure (nothing else):
     setHighlightedIndex(-1);
   };
 
+  // Ask Assistant (explicit handoff from search UI)
+  const handleAskAssistant = async () => {
+    if (!enableAISearch || !query.trim()) return;
+    track('docs.assistant.enter', { origin: 'search', query });
+    const rp = await roleplayLLM(query);
+    if (rp) {
+      setRoleplayReply(rp.reply || '');
+      // Merge LLM options with local rank as fallback
+      const local = localRank(query, socials);
+      setSuggestions(rp.options.length ? rp.options : local);
+      // Ensure panel stays open and keyboard focus is on first option
+      setIsFocused(true);
+      setHighlightedIndex(rp.options.length ? 0 : -1);
+    }
+  };
+
   // recompute suggestions on query change with debounce
   useEffect(() => {
     if (debounceRef.current) {
@@ -521,6 +569,7 @@ Return exactly this JSON structure (nothing else):
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsFocused(false);
+        if (query) track('docs.search.close', { origin: 'click_outside' });
       }
     };
 
@@ -534,7 +583,7 @@ Return exactly this JSON structure (nothing else):
   }, [isFocused]);
 
   return (
-    <div className="relative w-screen h-screen z-10 flex items-center justify-center pointer-events-none">
+    <div className="relative w-screen h-screen z-10 flex items-center justify-center pointer-events-none" data-id="SearchBarEntry">
       {/* Background blur overlay when focused */}
       <div className={`absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-none transition-opacity duration-300 ${
         isFocused ? 'opacity-100' : 'opacity-0'
@@ -542,7 +591,7 @@ Return exactly this JSON structure (nothing else):
       
       <div ref={containerRef} className="flex items-center gap-14 pointer-events-auto relative z-20">
         {/* Left: Glass Input */}
-        <form onSubmit={handleSubmit} aria-label="Search" className="relative">
+        <form onSubmit={handleSubmit} aria-label="Search" className="relative" data-id="SearchBarEntry">
           <div className="relative flex items-center w-[520px] h-16 px-6 bg-black/30 backdrop-blur-xl ring-1 ring-white/25 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.45)]">
             <GlowingEffect
               variant="white"
@@ -573,22 +622,31 @@ Return exactly this JSON structure (nothing else):
               onFocus={() => setIsFocused(true)}
               onKeyDown={(e) => {
                 const visible = suggestions.slice(0, 5);
+                const hasAskAssistant = enableAISearch && !!query.trim();
+                const maxIndex = visible.length + (hasAskAssistant ? 1 : 0) - 1; // include Ask Assistant as last option if shown
                 if (e.key === 'ArrowDown') {
                   e.preventDefault();
                   setIsFocused(true);
                   setHighlightedIndex((prev) => {
-                    const next = prev < visible.length - 1 ? prev + 1 : 0;
-                    return visible.length ? next : -1;
+                    const next = prev < maxIndex ? prev + 1 : 0;
+                    return maxIndex >= 0 ? next : -1;
                   });
                 } else if (e.key === 'ArrowUp') {
                   e.preventDefault();
                   setIsFocused(true);
                   setHighlightedIndex((prev) => {
-                    const next = prev > 0 ? prev - 1 : visible.length - 1;
-                    return visible.length ? next : -1;
+                    const next = prev > 0 ? prev - 1 : maxIndex;
+                    return maxIndex >= 0 ? next : -1;
                   });
                 } else if (e.key === 'Enter') {
                   const visible = suggestions.slice(0, 5);
+                  const hasAskAssistant = enableAISearch && !!query.trim();
+                  const askAssistantIndex = hasAskAssistant ? visible.length : -1;
+                  if (highlightedIndex === askAssistantIndex) {
+                    e.preventDefault();
+                    handleAskAssistant();
+                    return;
+                  }
                   if (highlightedIndex >= 0 && highlightedIndex < visible.length) {
                     e.preventDefault();
                     handleSelectItem(visible[highlightedIndex]);
@@ -599,6 +657,7 @@ Return exactly this JSON structure (nothing else):
                   setIsFocused(false);
                   setHighlightedIndex(-1);
                   inputRef.current?.blur();
+                  track('docs.search.close', { origin: 'keyboard' });
                 }
               }}
               placeholder="Wanna know about me?"
@@ -608,15 +667,17 @@ Return exactly this JSON structure (nothing else):
               aria-activedescendant={highlightedIndex >= 0 ? `option-${highlightedIndex}` : undefined}
               aria-autocomplete="list"
               className="ml-3 flex-1 bg-transparent text-white placeholder-white/70 outline-none"
+              data-id="SearchInput"
             />
           </div>
           {/* Suggestions dropdown */}
-          {(query && (suggestions.length > 0 || !!roleplayReply)) && (
+          {(query && (suggestions.length > 0 || !!roleplayReply || enableAISearch)) && (
             <div
               id="search-suggestions"
               role="listbox"
               aria-label="Search suggestions"
-              className="relative absolute left-0 top-full mt-16 w-[520px] bg-black/30 backdrop-blur-xl ring-1 ring-white/25 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.45)] overflow-hidden"
+              className="relative absolute left-0 top-full mt-16 w-[520px] bg-black/30 backdrop-blur-xl ring-1 ring-white/25 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.45)] overflow-hidden pt-3"
+              data-id="SearchResultsPanel"
             >
               <GlowingEffect
                 variant="white"
@@ -627,17 +688,23 @@ Return exactly this JSON structure (nothing else):
                 inactiveZone={0.01}
               />
               {roleplayReply && (
-                <div className="px-6 py-4">
+                <div className="px-6 pb-3">
                   <div className="flex items-start gap-3">
-                    <div className="shrink-0 w-7 h-7 rounded-lg bg-emerald-400/20 ring-1 ring-emerald-300/30 flex items-center justify-center text-emerald-300 text-xs font-semibold">
-                      AI
+                    <div className="shrink-0 w-7 h-7 rounded-lg bg-emerald-400/20 ring-1 ring-emerald-300/30 flex items-center justify-center text-emerald-300">
+                      <BubbleStar className="w-4 h-4 text-emerald-300" aria-hidden />
                     </div>
                     <div className="flex-1">
-                      <div className="mb-2 text-emerald-300/90 text-xs font-medium uppercase tracking-wide">
+                      <div className="mb-1 text-emerald-300/90 text-xs font-medium uppercase tracking-wide">
                         Roleplay Reply
                       </div>
-                      <div className="rounded-xl bg-white/5 ring-1 ring-white/10 px-4 py-3 text-white/90 whitespace-pre-wrap leading-relaxed text-sm">
-                        {roleplayReply}
+                      <div className="text-white/90 whitespace-pre-wrap leading-relaxed text-sm">
+                        <DecryptedText
+                          text={roleplayReply}
+                          animateOn="view"
+                          revealDirection="center"
+                          speed={30}
+                          maxIterations={18}
+                        />
                       </div>
                     </div>
                   </div>
@@ -660,7 +727,10 @@ Return exactly this JSON structure (nothing else):
                       className={`flex items-center h-14 px-6 cursor-pointer transition-colors ${
                         highlightedIndex === index ? 'bg-white/15' : 'hover:bg-white/10'
                       }`}
-                      onClick={() => handleSelectItem(s)}
+                      onClick={() => {
+                        track('docs.search.result_click', { id: s.id, type: s.type, url: s.url });
+                        handleSelectItem(s);
+                      }}
                       onMouseMove={() => setHighlightedIndex(index)}
                     >
                       <div className="w-10 flex items-center justify-center shrink-0">
@@ -668,13 +738,13 @@ Return exactly this JSON structure (nothing else):
                       </div>
                       <div className="ml-3 flex-1 flex flex-col gap-1 min-w-0">
                         <div className="flex items-center gap-3">
-                          <span className="text-white whitespace-nowrap">{s.name}</span>
+                          <span className="text-white whitespace-nowrap">{highlightText(s.name, query)}</span>
                           {s.type === 'social' && (
-                            <span className="text-white/60 whitespace-nowrap">{s.username}</span>
+                            <span className="text-white/60 whitespace-nowrap">{highlightText(s.username, query)}</span>
                           )}
                         </div>
                         {s.description && (
-                          <span className="text-white/60 text-sm line-clamp-1">{s.description}</span>
+                          <span className="text-white/60 text-sm line-clamp-1">{highlightText(s.description, query)}</span>
                         )}
                       </div>
                       <div className="w-10 flex items-center justify-center shrink-0 opacity-80">
@@ -687,6 +757,38 @@ Return exactly this JSON structure (nothing else):
                   </div>
                 );
               })}
+              {/* No results hint */}
+              {query && suggestions.slice(0, 5).length === 0 && !roleplayReply && (
+                <div className="px-6 py-4 text-sm text-white/70 border-t border-white/10">
+                  No direct matches. Try asking the assistant.
+                </div>
+              )}
+              {/* Ask Assistant CTA as an option at the bottom */}
+              {enableAISearch && query.trim() && (
+                <div
+                  id={`option-${suggestions.slice(0, 5).length}`}
+                  role="option"
+                  aria-selected={highlightedIndex === suggestions.slice(0, 5).length}
+                  tabIndex={-1}
+                  className={`flex items-center h-14 px-6 cursor-pointer transition-colors border-t border-white/10 ${
+                    highlightedIndex === suggestions.slice(0, 5).length ? 'bg-white/15' : 'hover:bg-white/10'
+                  }`}
+                  onClick={() => {
+                    track('docs.assistant.suggestion_click', { kind: 'ask_assistant', query });
+                    handleAskAssistant();
+                  }}
+                  onMouseMove={() => setHighlightedIndex(suggestions.slice(0, 5).length)}
+                >
+                  <div className="w-10 flex items-center justify-center shrink-0">
+                    <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-emerald-400/20 ring-1 ring-emerald-300/30 text-emerald-300">
+                      <BubbleStar className="w-3.5 h-3.5 text-emerald-300" aria-hidden />
+                    </span>
+                  </div>
+                  <div className="ml-3 flex-1 min-w-0">
+                    <span className="text-white">Ask Assistant about “{query}”</span>
+                  </div>
+                </div>
+              )}
               {loadingLLM && (
                 <div className="flex items-center justify-center gap-3 px-6 py-4 text-sm text-white/70 border-t border-white/10">
                   <Bouncy
