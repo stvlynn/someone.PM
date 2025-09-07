@@ -1,0 +1,62 @@
+ui:
+  fifthRight:
+    base:
+      opacity: 1
+      translateY: 0
+      transition: none
+    exit:
+      translateY: -48
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out
+    scroll:
+      fadeOutStart: 1.2
+      fadeOutWindow: 0.25
+      moveOutPx: 40
+
+photos:
+  - name: Night View of Central
+    location: Central, Hong Kong
+    url: https://images.unsplash.com/photo-1751247036934-38214f4d9808?q=80&w=1976&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+  - name: Kyoto Tower
+    location: Kyoto, Japan
+    url: https://images.unsplash.com/photo-1749267476075-7f26f4e51164?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+  - name: Peaceful Rest
+    location: Kota Kinabalu, Malaysia
+    url: https://images.unsplash.com/photo-1757172087292-fddb379cca96?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+  - name: What if
+    location: Shanghai, China
+    url: https://images.unsplash.com/photo-1749711391000-72a0cca73062?q=80&w=1035&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+  - name: Clash in the Pond
+    location: Yangzhou, China
+    url: https://images.unsplash.com/photo-1742743786399-c8336eca8bbd?q=80&w=2148&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+
+  - name: Night View of Central
+    location: Central, Hong Kong
+    url: https://images.unsplash.com/photo-1751301040902-2ceef305806f?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+
+  - name: From Old to New
+    location: Shenzhen, China
+    url: https://images.unsplash.com/photo-1750523853667-fef28639a1a6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+
+  - name: Mechanical Waltz
+    location: Otaru, Japan
+    url: https://images.unsplash.com/photo-1742493975867-11b297563233?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+
+  - name: Sapporo
+    location: Sapporo, Japan
+    url: https://images.unsplash.com/photo-1742493974739-8a35f67256f3?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+
+  - name: The Mist
+    location: Shanghai, China
+    url: https://images.unsplash.com/photo-1742492732128-2c573779b891?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+
+  - name: Tokyo Night View
+    location: Tokyo, Japan
+    url: https://images.unsplash.com/photo-1742492541313-21372ed13e06?q=80&w=1931&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+
+  - name: Melody Among Blossoms
+    location: Nagoya, Japan
+    url: https://images.unsplash.com/photo-1743347917895-f517eb227150?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+
+  - name: Somewhere I Should Be
+    location: Nagoya, Japan
+    url: https://s2.loli.net/2025/09/07/gxQMcY3n2jzarDW.jpg

@@ -1,0 +1,69 @@
+title: "Rejected By"
+ui:
+  titleTop: 30        # vh from top; move title further up
+  logoTop: 50         # vh; centers logo loop at screen midline
+  width: '100%'
+  logoHeight: 56      # px (slightly larger)
+  speed: 120          # px per second (negative reverses)
+  direction: left     # left | right
+  gap: 40             # px gap between logos
+  pauseOnHover: true
+  scaleOnHover: true
+  fadeOut: false
+  fadeOutColor: "#ffffff"
+logos:
+  - src: "/logos/bytedance-color.svg"
+    alt: "ByteDance"
+    href: "https://www.bytedance.com"
+  - src: "/logos/fastgpt-color.svg"
+    alt: "FastGPT"
+    href: "https://fastgpt.cn"
+  - src: "/logos/kimi-color.svg"
+    alt: "Kimi"
+    href: "https://kimi.ai"
+  - src: "/logos/siliconcloud-color.svg"
+    alt: "SiliconCloud"
+    href: "https://siliconflow.com"
+  - src: "/logos/mihoyo-favicon.ico"
+    alt: "Mihoyo"
+    href: "https://mihoyo.com"
+  - src: "/logos/Xiaomi_logo.svg"
+    alt: "Xiaomi"
+    href: "https://www.xiaomi.com"
+
+schools:
+  title: "Rejected Schools"
+  ui:
+    titleTop: 58      # vh; title for schools row
+    logoTop: 74       # vh; loop for schools row
+    width: '100%'
+    logoHeight: 52
+    speed: 110
+    direction: right
+    gap: 28
+    pauseOnHover: true
+    scaleOnHover: true
+    fadeOut: false
+    fitImageCard: true       # adapt glass card width to image ratio
+    cardPaddingX: 16
+    cardPaddingY: 10
+  logos:
+    - src: "/logos/Hokkaido_University.svg"
+      alt: "Hokkaido University"
+      href: "https://www.hokudai.ac.jp"
+    - src: "/logos/tohokuu.png"
+      alt: "Tohoku University"
+      href: "https://www.tohoku.ac.jp"
+    - src: "/logos/kyushu.png"
+      alt: "Kyushu University"
+      href: "https://www.kyushu-u.ac.jp"
+    - src: "/logos/Logo_of_University_of_Tsukuba.svg"
+      alt: "University of Tsukuba"
+      href: "https://www.tsukuba.ac.jp"
+    - src: "/logos/nagoyau.svg"
+      alt: "University of Nagoya"
+      href: "https://www.nagoya-u.ac.jp"
+    - src: "/logos/osakau.svg"
+      alt: "University of Osaka"
+      href: "https://www.osaka-u.ac.jp"
+      

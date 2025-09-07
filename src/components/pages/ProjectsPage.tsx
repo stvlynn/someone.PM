@@ -3,7 +3,7 @@ import yaml from 'js-yaml'
 // Vite supports importing file contents as raw strings via ?raw
 import projectsYaml from '../../data/projects.yaml?raw'
 import BlurText from '../../BlurText'
-import InfiniteScroll from '../InfiniteScroll'
+import SimpleCardsColumn from '../SimpleCardsColumn'
 import { GlowingEffect } from '@/components/ui/glowing-effect'
 import './ProjectsPage.css'
 
@@ -22,7 +22,6 @@ export default function ProjectsPage({
   fourthSectionRef,
   fourthContainerRef
 }: ProjectsPageProps) {
-  const [isExiting, setIsExiting] = useState(false)
   const [showLine2, setShowLine2] = useState(false)
   
   // Parse YAML once (ui config + projects list)
@@ -64,47 +63,45 @@ export default function ProjectsPage({
   const leftTextLine1 = 'Vibe Coding'
   const leftTextLine2 = 'for Technology Equity'
 
-  const items = projects.map((p, idx) => ({
-    content: (
-      <a
-        key={idx}
-        className="proj-card relative block overflow-hidden hover:bg-white/10 transition-colors"
-        href={p.url}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {/* Glow border on mouse proximity (same as homepage send button) */}
-        <GlowingEffect
-          variant="white"
-          glow={true}
-          disabled={false}
-          proximity={64}
-          spread={40}
-          inactiveZone={0.01}
-          borderWidth={1}
-          className="z-0"
-        />
-        <div className="relative z-10">
-          {p.image && (
-            <div className="w-full h-28 overflow-hidden rounded-t-2xl bg-black/20">
-              <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+  const cardNodes = projects.map((p, idx) => (
+    <a
+      key={idx}
+      className="proj-card relative block overflow-hidden hover:bg-white/10 transition-colors"
+      href={p.url}
+      target="_blank"
+      rel="noreferrer"
+    >
+      {/* Glow border on mouse proximity (same as homepage send button) */}
+      <GlowingEffect
+        variant="white"
+        glow={true}
+        disabled={false}
+        proximity={64}
+        spread={40}
+        inactiveZone={0.01}
+        borderWidth={1}
+        className="z-0"
+      />
+      <div className="relative z-10">
+        {p.image && (
+          <div className="w-full h-28 overflow-hidden rounded-t-2xl bg-black/20">
+            <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+          </div>
+        )}
+        <div className="p-3">
+          <div className="text-base font-semibold">{p.name}</div>
+          {p.description && <div className="mt-1 text-sm opacity-80 line-clamp-3">{p.description}</div>}
+          {p.tech && p.tech.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1 text-xs opacity-80">
+              {p.tech.map((t, i) => (
+                <span key={i} className="px-2 py-0.5 rounded-full bg-white/10">{t}</span>
+              ))}
             </div>
           )}
-          <div className="p-3">
-            <div className="text-base font-semibold">{p.name}</div>
-            {p.description && <div className="mt-1 text-sm opacity-80 line-clamp-3">{p.description}</div>}
-            {p.tech && p.tech.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1 text-xs opacity-80">
-                {p.tech.map((t, i) => (
-                  <span key={i} className="px-2 py-0.5 rounded-full bg-white/10">{t}</span>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
-      </a>
-    )
-  }))
+      </div>
+    </a>
+  ))
 
   return (
     <section ref={fourthSectionRef} className="page-section fourth-page" id="fourth-section">
@@ -131,9 +128,10 @@ export default function ProjectsPage({
         <div 
           className="fourth-left sticky-left"
           style={{
-            opacity: isExiting ? 0 : 1,
-            transform: isExiting ? 'translateY(-30px)' : 'translateY(0px)',
-            transition: isExiting ? 'opacity 0.5s ease-out, transform 0.5s ease-out' : 'none'
+            // Match exit of the section: fade/slide when fourthProgress passes fadeOutStart
+            opacity: fourthProgress <= fadeOutStart ? 1 : Math.max(0, 1 - (fourthProgress - fadeOutStart) / fadeOutWindow),
+            transform: fourthProgress <= fadeOutStart ? 'translateY(0px)' : `translateY(${exitTranslateY}px)`,
+            transition: exitTransition,
           }}
         >
           <div>
@@ -163,36 +161,23 @@ export default function ProjectsPage({
           </div>
         </div>
 
-        {/* Right: Infinite Scroll cards */}
+        {/* Right: Progress-driven cards track (no nested scroll) */}
         <div
           className="fourth-right right-stage"
           style={{
-            opacity: isExiting ? 0 : (fourthProgress <= fadeOutStart ? baseOpacity : Math.max(0, baseOpacity - (fourthProgress - fadeOutStart) / fadeOutWindow)),
-            transform: isExiting
-              ? `translateY(${exitTranslateY}px)`
-              : (fourthProgress <= fadeOutStart
-                ? `translateY(${baseTranslateY}px)`
-                : `translateY(${-(fourthProgress - fadeOutStart) / fadeOutWindow * moveOutPx + baseTranslateY}px)`),
-            transition: isExiting ? exitTransition : baseTransition,
+            opacity: fourthProgress <= fadeOutStart ? baseOpacity : Math.max(0, baseOpacity - (fourthProgress - fadeOutStart) / fadeOutWindow),
+            transform: fourthProgress <= fadeOutStart
+              ? `translateY(${baseTranslateY}px)`
+              : `translateY(${-(fourthProgress - fadeOutStart) / fadeOutWindow * moveOutPx + baseTranslateY}px)`,
+            transition: baseTransition,
           }}
         >
-          <InfiniteScroll
+          <SimpleCardsColumn
+            items={cardNodes}
             width="28rem"
-            maxHeight="28rem"
-            negativeMargin="0px"
             itemMinHeight={itemMinHeightFromConfig}
             itemGap={itemGapUsed}
-            isTilted={false}
-            tiltDirection="right"
-            listenTarget={fourthSectionRef.current as HTMLElement | null}
-            loop={false}
-            onBoundaryReached={(boundary) => {
-              console.log(`Reached ${boundary} boundary - trigger exit effect`);
-              setIsExiting(true);
-              // Reset after animation duration
-              setTimeout(() => setIsExiting(false), 800);
-            }}
-            items={items}
+            progress={fourthProgress}
           />
         </div>
       </div>

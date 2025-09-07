@@ -1,0 +1,47 @@
+.rejected-page {
+  min-height: 100vh;
+  display: block;
+}
+
+.rejected-container {
+  position: relative;
+  width: 100%;
+  max-width: 64rem; /* align with projects page width */
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  min-height: 100vh;
+}
+
+/* Title position: a bit above center */
+.rejected-title-wrap {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 36vh; /* middle-upper */
+}
+
+/* Match previous page font, size, color (Jersey 20, 3.25rem, white) */
+.rejected-title {
+  font-family: "Jersey 20", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 3.25rem;
+  color: white;
+  line-height: 1.15;
+  white-space: pre-line;
+}
+
+/* Logo wall placed exactly at viewport midline */
+.rejected-logo-stage {
+  position: absolute;
+  top: 50vh;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  height: 200px;
+}
+
+@media (max-width: 900px) {
+  .rejected-title { font-size: 2.5rem; }
+}
+

@@ -4,6 +4,8 @@ import SearchPage from './components/pages/SearchPage'
 import ContentPage from './components/pages/ContentPage'
 import NamePage from './components/pages/NamePage'
 import ProjectsPage from './components/pages/ProjectsPage'
+import AlbumPage from './components/pages/AlbumPage'
+import RejectedByPage from './components/pages/RejectedByPage'
 import ScrollController from './components/ScrollController'
 import GlobalEffects from './components/GlobalEffects'
 
@@ -25,6 +27,12 @@ function App() {
   const [fourthRawProgress, setFourthRawProgress] = useState(0)
   const fourthSectionRef = useRef<HTMLElement>(null)
   const fourthContainerRef = useRef<HTMLDivElement>(null)
+  // Fifth page sticky + progress
+  const [fifthSticky, setFifthSticky] = useState(false)
+  const [fifthProgress, setFifthProgress] = useState(0)
+  const [fifthRawProgress, setFifthRawProgress] = useState(0)
+  const fifthSectionRef = useRef<HTMLElement>(null)
+  const fifthContainerRef = useRef<HTMLDivElement>(null)
 
 
   return (
@@ -62,6 +70,18 @@ function App() {
         fourthContainerRef={fourthContainerRef}
       />
 
+      {/* Fifth Page - Album Page */}
+      <AlbumPage
+        fifthSticky={fifthSticky}
+        fifthProgress={fifthProgress}
+        fifthRawProgress={fifthRawProgress}
+        fifthSectionRef={fifthSectionRef}
+        fifthContainerRef={fifthContainerRef}
+      />
+
+      {/* Sixth Page - Rejected By */}
+      <RejectedByPage />
+
       {/* Scroll Controller */}
       <ScrollController
         textContentRef={textContentRef}
@@ -70,6 +90,8 @@ function App() {
         thirdContainerRef={thirdContainerRef}
         fourthSectionRef={fourthSectionRef}
         fourthContainerRef={fourthContainerRef}
+        fifthSectionRef={fifthSectionRef}
+        fifthContainerRef={fifthContainerRef}
         onScrollProgressChange={setScrollProgress}
         onContentStickyChange={setIsContentSticky}
         onThirdProgressChange={setThirdProgress}
@@ -78,6 +100,9 @@ function App() {
         onFourthProgressChange={setFourthProgress}
         onFourthRawProgressChange={setFourthRawProgress}
         onFourthStickyChange={setFourthSticky}
+        onFifthProgressChange={setFifthProgress}
+        onFifthRawProgressChange={setFifthRawProgress}
+        onFifthStickyChange={setFifthSticky}
       />
     </>
   )

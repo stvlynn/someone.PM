@@ -116,6 +116,12 @@ const FallingText: React.FC<FallingTextProps> = ({
         wireframes,
       },
     });
+    // Ensure the internal canvas never intercepts scroll/hover
+    if (render.canvas) {
+      render.canvas.style.pointerEvents = "none";
+      // Allow vertical scroll on touch devices when hovering the area
+      render.canvas.style.touchAction = "pan-y";
+    }
 
     const boundaryOptions = { isStatic: true, render: { fillStyle: "transparent" } } as const;
     const floor = Bodies.rectangle(width / 2, stageHeight + 25, width, 50, boundaryOptions);
@@ -156,6 +162,35 @@ const FallingText: React.FC<FallingTextProps> = ({
     });
     render.mouse = mouse;
 
+    // Matter.Mouse attaches non-passive wheel/touch listeners to the same element
+    // which call preventDefault and block page scrolling. Intercept them in capture phase.
+    const el = containerRef.current;
+    const stopWheel = (e: Event) => {
+      // allow default (scroll) but prevent Matter's bubble listeners from running
+      // and calling preventDefault
+      // @ts-ignore - stopImmediatePropagation exists on Event
+      if (typeof (e as any).stopImmediatePropagation === 'function') (e as any).stopImmediatePropagation();
+      e.stopPropagation();
+    };
+    let touchActive = false;
+    const onTouchStart = () => { touchActive = true; };
+    const onTouchEnd = () => { touchActive = false; };
+    const stopTouchMove = (e: Event) => {
+      // Allow scrolling when not actively dragging via touch
+      if (touchActive) return;
+      // Let touch scrolling pass through; avoid Matter's preventDefault on touchmove
+      // @ts-ignore
+      if (typeof (e as any).stopImmediatePropagation === 'function') (e as any).stopImmediatePropagation();
+      e.stopPropagation();
+    };
+    el?.addEventListener('wheel', stopWheel, { capture: true, passive: true });
+    el?.addEventListener('mousewheel', stopWheel as EventListener, { capture: true, passive: true } as any);
+    el?.addEventListener('DOMMouseScroll', stopWheel as EventListener, { capture: true, passive: true } as any);
+    el?.addEventListener('touchstart', onTouchStart, { capture: true, passive: true });
+    el?.addEventListener('touchend', onTouchEnd, { capture: true, passive: true });
+    el?.addEventListener('touchcancel', onTouchEnd, { capture: true, passive: true });
+    el?.addEventListener('touchmove', stopTouchMove, { capture: true, passive: true });
+
     World.add(engine.world, [floor, leftWall, rightWall, ceiling, mouseConstraint, ...bodies.map((b) => b.body)]);
 
     const runner = Runner.create();
@@ -182,6 +217,14 @@ const FallingText: React.FC<FallingTextProps> = ({
       }
       World.clear(engine.world, false);
       Matter.Engine.clear(engine);
+      // remove capture listeners
+      el?.removeEventListener('wheel', stopWheel as EventListener, { capture: true } as any);
+      el?.removeEventListener('mousewheel', stopWheel as EventListener, { capture: true } as any);
+      el?.removeEventListener('DOMMouseScroll', stopWheel as EventListener, { capture: true } as any);
+      el?.removeEventListener('touchstart', onTouchStart as EventListener, { capture: true } as any);
+      el?.removeEventListener('touchend', onTouchEnd as EventListener, { capture: true } as any);
+      el?.removeEventListener('touchcancel', onTouchEnd as EventListener, { capture: true } as any);
+      el?.removeEventListener('touchmove', stopTouchMove as EventListener, { capture: true } as any);
     };
   }, [effectStarted, gravity, wireframes, backgroundColor, mouseConstraintStiffness, height]);
 
@@ -192,7 +235,7 @@ const FallingText: React.FC<FallingTextProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative z-[1] w-full cursor-pointer text-center overflow-hidden ${className || ""}`}
+      className={`relative z-[1] w-full cursor-pointer text-center overflow-hidden touch-pan-y ${className || ""}`}
       style={{ height, opacity }}
       onClick={trigger === "click" ? handleTrigger : undefined}
       onMouseEnter={trigger === "hover" ? handleTrigger : undefined}
@@ -202,7 +245,7 @@ const FallingText: React.FC<FallingTextProps> = ({
         className="inline-block"
         style={{ fontSize, lineHeight: 1.4, color: textColor, fontFamily }}
       />
-      <div className="absolute top-0 left-0 z-0 w-full h-full" ref={canvasContainerRef} />
+      <div className="absolute top-0 left-0 z-0 w-full h-full pointer-events-none" ref={canvasContainerRef} />
     </div>
   );
 };

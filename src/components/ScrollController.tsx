@@ -7,6 +7,8 @@ interface ScrollControllerProps {
   thirdContainerRef: React.RefObject<HTMLDivElement | null>
   fourthSectionRef: React.RefObject<HTMLElement | null>
   fourthContainerRef: React.RefObject<HTMLDivElement | null>
+  fifthSectionRef: React.RefObject<HTMLElement | null>
+  fifthContainerRef: React.RefObject<HTMLDivElement | null>
   onScrollProgressChange: (progress: number) => void
   onContentStickyChange: (sticky: boolean) => void
   onThirdProgressChange: (progress: number) => void
@@ -15,6 +17,9 @@ interface ScrollControllerProps {
   onFourthProgressChange: (progress: number) => void
   onFourthRawProgressChange: (rawProgress: number) => void
   onFourthStickyChange: (sticky: boolean) => void
+  onFifthProgressChange: (progress: number) => void
+  onFifthRawProgressChange: (rawProgress: number) => void
+  onFifthStickyChange: (sticky: boolean) => void
 }
 
 export default function ScrollController({
@@ -24,6 +29,8 @@ export default function ScrollController({
   thirdContainerRef,
   fourthSectionRef,
   fourthContainerRef,
+  fifthSectionRef,
+  fifthContainerRef,
   onScrollProgressChange,
   onContentStickyChange,
   onThirdProgressChange,
@@ -31,7 +38,10 @@ export default function ScrollController({
   onThirdStickyChange,
   onFourthProgressChange,
   onFourthRawProgressChange,
-  onFourthStickyChange
+  onFourthStickyChange,
+  onFifthProgressChange,
+  onFifthRawProgressChange,
+  onFifthStickyChange
 }: ScrollControllerProps) {
   useEffect(() => {
     const handleScroll = () => {
@@ -80,6 +90,18 @@ export default function ScrollController({
         const fourthShouldStick = scrollY > fourthTop - windowHeight * 0.6 && fourthRaw < fourthRelease && fourthRaw > -0.15
         onFourthStickyChange(fourthShouldStick)
       }
+
+      // ---- Fifth page progress & sticky ----
+      if (fifthSectionRef.current && fifthContainerRef.current) {
+        const fifthTop = fifthSectionRef.current.offsetTop
+        const fifthRaw = (scrollY - (fifthTop - windowHeight * 0.2)) / (windowHeight * 0.9)
+        onFifthRawProgressChange(fifthRaw)
+        const fifthExt = Math.max(0, fifthRaw)
+        onFifthProgressChange(fifthExt)
+        const fifthRelease = 1.35
+        const fifthShouldStick = scrollY > fifthTop - windowHeight * 0.6 && fifthRaw < fifthRelease && fifthRaw > -0.15
+        onFifthStickyChange(fifthShouldStick)
+      }
     }
 
     window.addEventListener('scroll', handleScroll)
@@ -93,6 +115,8 @@ export default function ScrollController({
     thirdContainerRef,
     fourthSectionRef,
     fourthContainerRef,
+    fifthSectionRef,
+    fifthContainerRef,
     onScrollProgressChange,
     onContentStickyChange,
     onThirdProgressChange,
@@ -100,7 +124,10 @@ export default function ScrollController({
     onThirdStickyChange,
     onFourthProgressChange,
     onFourthRawProgressChange,
-    onFourthStickyChange
+    onFourthStickyChange,
+    onFifthProgressChange,
+    onFifthRawProgressChange,
+    onFifthStickyChange
   ])
 
   return null
