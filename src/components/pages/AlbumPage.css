@@ -1,0 +1,133 @@
+.fifth-page {
+  height: auto;
+  min-height: 180vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fifth-container {
+  width: 100%;
+  max-width: 90rem; /* wider to enable more columns */
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.fifth-container.fifth-sticky {
+  position: fixed !important;
+  top: 50% !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: translateY(-50%) !important;
+  z-index: 25 !important;
+  width: 100% !important;
+}
+
+.fifth-grid {
+  display: grid;
+  grid-template-columns: 0.6fr 1.4fr; /* smaller left column */
+  align-items: center;
+  gap: 2rem;
+}
+
+.fifth-title {
+  font-family: "Jersey 20", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 3.25rem;
+  color: white;
+  line-height: 1.15;
+  white-space: pre-line;
+}
+
+.sticky-left {
+  position: sticky;
+  top: 50vh;
+  transform: translateY(-50%);
+}
+
+.right-stage {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .fifth-grid { grid-template-columns: 1fr; }
+  .sticky-left { top: 20vh; }
+}
+
+/* Masonry-style image grid that fills horizontally */
+.album-masonry {
+  width: 100%;
+  column-count: 3;
+  column-gap: 16px;
+}
+@media (min-width: 1600px) {
+  .album-masonry { column-count: 4; }
+}
+@media (max-width: 1200px) {
+  .album-masonry { column-count: 2; }
+}
+@media (max-width: 720px) {
+  .album-masonry { column-count: 1; }
+}
+
+.album-card {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 16px;
+  position: relative;
+  /* Leave a bit more space on bottom for the label */
+  padding: 12px 12px 56px; /* top right/left bottom */
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  backdrop-filter: blur(6px);
+  transition: transform 220ms ease, opacity 220ms ease, filter 220ms ease, box-shadow 220ms ease;
+  will-change: transform, filter;
+  cursor: pointer;
+  z-index: 0;
+}
+
+.album-card .image-wrap {
+  padding-block: 12px; /* clear space above and below the image */
+}
+
+.album-card img {
+  display: block;
+  width: 100%;
+  height: auto; /* preserve intrinsic aspect ratio */
+  object-fit: contain; /* preserve ratio with letterbox in padded card */
+  border-radius: 10px;
+}
+
+.album-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.9);
+  border: 1px solid rgba(255,255,255,0.2);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.album-card:hover {
+  opacity: 1 !important;
+  transform: translateY(-4px) scale(1.03);
+  filter: none !important;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.35);
+  z-index: 2;
+}
