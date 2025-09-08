@@ -1,0 +1,23 @@
+# User social profiles
+# icon: id used in UI mapping (e.g., iconoir-react key)
+items:
+  - id: twitter
+    name: Twitter
+    username: Stv_Lynn
+    icon: twitter
+    url: https://twitter.com/Stv_Lynn
+  - id: telegram
+    name: Telegram
+    username: stvlynn
+    icon: telegram
+    url: https://t.me/stvlynn
+  - id: github
+    name: GitHub
+    username: stvlynn
+    icon: github
+    url: https://github.com/stvlynn
+  - id: instagram
+    name: Instagram
+    username: stvlynn
+    icon: instagram
+    url: https://instagram.com/stvlynn

@@ -154,6 +154,15 @@ export default function LogoLoop({
                 setImgCardWidths((prev) => (prev[origIndex] === cardW ? prev : { ...prev, [origIndex]: cardW }))
                 setImagesVersion((v) => v + 1)
               }}
+              onError={(e) => {
+                const t = e.currentTarget as HTMLImageElement
+                const ph = encodeURIComponent(logo.alt || 'Logo')
+                t.src = `data:image/svg+xml;utf8,` +
+                  `%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E` +
+                  `%3Crect width='100%25' height='100%25' fill='white' fill-opacity='0.08'/%3E` +
+                  `%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' fill-opacity='0.8' font-size='14' font-family='sans-serif'%3E${ph}%3C/text%3E` +
+                  `%3C/svg%3E`
+              }}
             />
           ) : null
 
